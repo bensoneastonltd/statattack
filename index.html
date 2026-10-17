@@ -772,6 +772,9 @@ a.btn.ghost { color: var(--ink); }
 }
 
 /* Group photo split */
+.gadd { display: flex; gap: 8px; flex-wrap: wrap; }
+.gadd .btn svg { width: 17px; height: 17px; }
+.gadd .btn svg:first-child { margin-left: -4px; transform: none; }
 .add-tile { padding: 14px; gap: 12px; place-content: stretch; justify-items: stretch; align-items: stretch; grid-template-rows: 1fr 1fr; cursor: default; }
 .gprog-row .count { white-space: nowrap; }
 .add-tile:hover { border-color: var(--line-strong); color: var(--muted); }
@@ -1608,6 +1611,10 @@ function renderDraft(keep) {
       </div>
     </div>
     <div class="gprog" id="gProg">${progressHTML()}</div>
+    <div class="gadd">
+      <button type="button" class="btn primary small" id="gPhotoBtn">${CAMERA}Add from a group photo</button>
+      <button type="button" class="btn ghost small" id="gAddBtn">${PLUS}Add a card</button>
+    </div>
     <div id="addSlot">${G.split ? splitHTML() : addPanelHTML()}</div>
     <div class="rate-wrap">
       <div class="rate-track" id="rateTrack">
@@ -1666,7 +1673,8 @@ function wireDraft() {
   const step = dir => { const w = t.children[0].getBoundingClientRect().width + 12; t.scrollBy({ left: dir * w, behavior: reduceMotion ? "auto" : "smooth" }); };
   $("rPrev").onclick = () => step(-1); $("rNext").onclick = () => step(1);
   $("gAddTile").onclick = () => openCardForm(null);
-  $("gPhotoTile").onclick = () => { $("spFile").value = ""; $("spFile").click(); };
+  $("gPhotoTile").onclick = $("gPhotoBtn").onclick = () => { $("spFile").value = ""; $("spFile").click(); };
+  $("gAddBtn").onclick = () => openCardForm(null);
   $("spFile").onchange = e => { const f = e.target.files && e.target.files[0]; if (f) { startSplit(f); $("addSlot").scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" }); } };
   t.querySelectorAll("input[type=range]").forEach(inp => {
     const go = () => onSlide(inp);
@@ -2190,7 +2198,7 @@ function myDecksPanel() {
   const mine = myDecks();
   return `
     <div class="panel" id="myDecks">
-      <div class="panel-head"><h2>Your decks</h2><span class="head-btns"><button type="button" class="btn ghost small" id="newGroup">${GROUP_ICON}With friends</button><button type="button" class="btn primary small" id="newDeck">${PLUS}Create a deck</button></span></div>
+      <div class="panel-head"><h2>Your decks</h2><span class="head-btns"><button type="button" class="btn ghost small" id="newGroup">${GROUP_ICON}Make one with friends</button><button type="button" class="btn primary small" id="newDeck">${PLUS}Create a deck</button></span></div>
       <ul class="games-list" id="groupList"></ul>
       ${mine.length ? `<ul class="games-list">${mine.map(d => `
         <li class="gi-row"><button type="button" class="game-item" data-edit="${d.key}">
