@@ -839,7 +839,8 @@ a.btn.ghost { color: var(--ink); }
 /* Google Places */
 .gcredit { position: absolute; left: 8px; top: 8px; z-index: 1; max-width: 70%; font-size: 9.5px; font-weight: 600; line-height: 1.4; padding: 2px 7px; border-radius: 999px; background: rgba(0, 0, 0, .45); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
 .mart .gcredit, .tile .gcredit, .ce-photo .gcredit { font-size: 0; padding: 0; width: 6px; height: 6px; left: 5px; top: 5px; background: #fff; opacity: .8; }
-.rc-art .gcredit { left: auto; right: 12px; top: auto; bottom: 12px; }
+.rc-art .gcredit { left: auto; right: 12px; top: 12px; max-width: 55%; }
+.rc-art:has(.me-chip) .gcredit { top: 40px; }
 img.gplace:not([src]) { opacity: 0; }
 img.gplace { transition: opacity .3s; }
 .pl-row.g { grid-template-columns: auto 48px minmax(0, 1fr); }
