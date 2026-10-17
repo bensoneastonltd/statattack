@@ -2269,7 +2269,7 @@ async function searchPlaces(text) {
   if (!area) throw new Error(`Couldn't find "${where}" on the map. Try a town or area name.`);
   let lat = +area.lat, lon = +area.lon;
   const [s, n, w, e] = area.boundingbox.map(Number);
-  let hLat = Math.min(.045, Math.max(.012, (n - s) / 2)), hLon = Math.min(.07, Math.max(.018, (e - w) / 2));
+  let hLat = Math.min(.03, Math.max(.012, (n - s) / 2)), hLon = Math.min(.046, Math.max(.018, (e - w) / 2));
   if (dir) {
     // "south London": centre on that side of the place
     const bigLat = Math.max(.03, (n - s) / 4), bigLon = Math.max(.05, (e - w) / 4);
@@ -2281,8 +2281,11 @@ async function searchPlaces(text) {
   const res = await osmGet({ q: kind.q, limit: 40, bounded: 1, viewbox });
   const seen = new Set();
   const results = res.filter(x => x.name && kind.types.includes(x.type) && !seen.has(x.name.toLowerCase()) && seen.add(x.name.toLowerCase()));
-  const place = (area.name || where).replace(/^./, c => c.toUpperCase());
-  return { label: `${kind.words[0].replace(/^./, c => c.toUpperCase())} in ${dir ? dir.replace(/^./, c => c.toUpperCase()) + " " : ""}${place}`, results, centre: [lat, lon] };
+  const cap = t => t.replace(/\b\w/g, c => c.toUpperCase());
+  // nearest the middle first
+  const dist = x => (x.lat - lat) ** 2 + ((x.lon - lon) * Math.cos(lat * Math.PI / 180)) ** 2;
+  results.sort((a, b) => dist(a) - dist(b));
+  return { label: `${cap(kind.words[0])} in ${dir ? cap(dir) + " " : ""}${cap(where)}`, results, centre: [lat, lon] };
 }
 function placeSub(x, centre) {
   const a = x.address || {}, bits = [a.road, a.suburb || a.neighbourhood || a.town || a.city].filter(Boolean);
