@@ -499,7 +499,7 @@ button.row:not(:disabled):active { transform: scale(.985); }
 .card-eds { display: grid; gap: 10px; }
 .ce { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 10px; border-radius: 16px; background: var(--surface-2); border: 1.5px solid transparent; transition: border-color .2s, background .2s; animation: pillIn .3s var(--ease) both; }
 .ce.sel { border-color: var(--accent); background: var(--surface); }
-.ce-photo { position: relative; width: 92px; height: 92px; border-radius: 12px; border: 0; padding: 0; overflow: hidden; cursor: pointer; display: grid; place-items: center; align-content: center; gap: 4px; color: #fff; font-size: 11.5px; font-weight: 600;
+.ce-photo { position: relative; isolation: isolate; width: 92px; height: 92px; border-radius: 12px; border: 0; padding: 0; overflow: hidden; cursor: pointer; display: grid; place-items: center; align-content: center; gap: 4px; color: #fff; font-size: 11.5px; font-weight: 600;
   background: radial-gradient(110% 90% at 92% 0%, hsl(var(--h) 100% 72% / .95), transparent 55%), linear-gradient(155deg, hsl(var(--h) 82% 56%), hsl(calc(var(--h) - 22) 72% 30%)); }
 .ce-photo svg { width: 24px; height: 24px; opacity: .9; }
 .ce-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
