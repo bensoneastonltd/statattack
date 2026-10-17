@@ -517,6 +517,7 @@ button.row:not(:disabled):active { transform: scale(.985); }
 .vfield input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .vfield input[aria-invalid="true"] { border-color: var(--lose); box-shadow: 0 0 0 3px var(--lose-soft); }
 .field:has(input[aria-invalid="true"]) { border-color: var(--lose); box-shadow: 0 0 0 3px var(--lose-soft); }
+.sent-note { margin: 0 0 10px; font-size: 14px; }
 .small-link { font-size: 12.5px; padding: 0; justify-self: start; }
 .ed-side { min-width: 0; }
 .ed-preview { display: grid; gap: 12px; }
@@ -979,8 +980,10 @@ function accountHTML() {
           <div class="row-form"><div class="field"><input id="emailIn" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"></div><button type="submit" class="btn primary small" id="sendCode">Send code</button></div>
         </div>
         <div id="codeStep" hidden>
-          <label class="section-title" for="codeIn" id="codeLbl">Enter the 6-digit code we emailed you</label>
-          <div class="row-form"><div class="field"><input id="codeIn" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div><button type="submit" class="btn primary small" id="verifyCode">Verify</button></div>
+          <p class="sent-note" id="codeLbl">Check your email and tap the link. It opens StatAttack and finishes signing in.</p>
+          <div class="row-form"><button type="button" class="btn primary small" id="linkDone">I've tapped the link</button></div>
+          <label class="section-title" for="codeIn">Or enter the code, if your email has one</label>
+          <div class="row-form"><div class="field"><input id="codeIn" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div><button type="submit" class="btn ghost small" id="verifyCode">Verify</button></div>
           <button type="button" class="link small-link" id="changeEmail">Use a different email</button>
         </div>
       </form>
@@ -1007,6 +1010,7 @@ function wireAccount() {
   };
   if ($("switchGoogle")) $("switchGoogle").onclick = () => googleSignIn(true);
   $("emailFlow").onsubmit = e => { e.preventDefault(); if (!$("codeStep").hidden) verifyCode(); else sendCode(); };
+  $("linkDone").onclick = linkDone;
   $("changeEmail").onclick = () => { $("codeStep").hidden = true; $("emailStep").hidden = false; $("emailIn").focus(); };
 }
 function rerenderAccount() { const a = $("acct"); if (!a) return; a.outerHTML = accountHTML(); wireAccount(); }
@@ -1040,8 +1044,19 @@ async function sendCode() {
   if (authNotice && $("authNotice")) $("authNotice").innerHTML = authNotice;
   else if (authNotice) $("authBtns").insertAdjacentHTML("beforebegin", `<div class="notebar" id="authNotice">${authNotice}</div>`);
   $("emailStep").hidden = true; $("codeStep").hidden = false;
-  $("codeLbl").textContent = `Enter the 6-digit code we emailed to ${email}`;
-  $("codeIn").value = ""; $("codeIn").focus();
+  $("codeLbl").textContent = `We've emailed a link to ${email}. Tap it on this device to finish. It opens StatAttack and signs you in.`;
+  $("codeIn").value = "";
+}
+async function linkDone() {
+  // The link may have opened in another tab or in Safari: pick up the change from the server
+  const btn = $("linkDone"); btn.disabled = true; btn.textContent = "Checking…";
+  try { await sb.auth.refreshSession(); } catch (e) {}
+  const { data } = await sb.auth.getUser();
+  btn.disabled = false; btn.textContent = "I've tapped the link";
+  const u = data && data.user;
+  if (emailMode === "signin" || (u && u.id !== me)) { location.replace(APP_URL); return; }
+  if (u && !u.is_anonymous && u.email) { toast("Account saved"); isGuest = false; myEmail = u.email; authNotice = ""; home(); return; }
+  toast("Not confirmed yet. Tap the link in the email, then try again.");
 }
 async function verifyCode() {
   const token = $("codeIn").value.replace(/\D/g, "");
@@ -1058,7 +1073,8 @@ async function verifyCode() {
 function readAuthReturn() {
   // Errors from a Google round trip come back in the address bar
   const params = new URLSearchParams(location.search + "&" + location.hash.replace(/^#/, ""));
-  const code = params.get("error_code"), desc = params.get("error_description");
+  const code = params.get("error_code"), desc = params.get("error_description"), msg = params.get("message");
+  if (msg && !code && !desc) { authNotice = esc(msg); history.replaceState(null, "", location.pathname); return; }
   if (!code && !desc) return;
   if (code === "identity_already_exists" || /already linked|already exists/i.test(desc || "")) {
     authNotice = `That Google account already has a StatAttack account. <button type="button" class="link inline" id="switchGoogle">Sign in to it instead</button>. Games you played here as a guest stay with the guest account.`;
