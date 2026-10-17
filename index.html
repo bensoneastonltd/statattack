@@ -1493,9 +1493,8 @@ async function renderAlertsRow() {
     unsupported: "This browser can't show alerts. Try Chrome, Edge, Firefox, or StatAttack on your iPhone Home Screen."
   }[st];
   row.innerHTML = `<span class="setting-icon">${BELL}</span><div class="setting-text"><b>Turn alerts</b><span>${text}</span></div>
-    ${st === "on" ? `<span class="head-btns"><button type="button" class="btn ghost small" id="alertsTest">Send a test</button><button type="button" class="btn ghost small" id="alertsOff">Turn off</button></span>` : st === "off" ? `<button type="button" class="btn primary small" id="alertsOn">Turn on</button>` : ""}`;
+    ${st === "on" ? `<button type="button" class="btn ghost small" id="alertsOff">Turn off</button>` : st === "off" ? `<button type="button" class="btn primary small" id="alertsOn">Turn on</button>` : ""}`;
   if ($("alertsOn")) $("alertsOn").onclick = async () => { const b = $("alertsOn"); b.disabled = true; b.textContent = "Turning on…"; await enableAlerts(); renderAlertsRow(); };
-  if ($("alertsTest")) $("alertsTest").onclick = testAlert;
   if ($("alertsOff")) $("alertsOff").onclick = async () => { await disableAlerts(); renderAlertsRow(); };
 }
 function notifyGroup(draftId, kind) {
