@@ -848,6 +848,22 @@ img.gplace { transition: opacity .3s; }
 .pl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pl-credit { font-size: 10.5px !important; opacity: .8; }
 .pl-src .gm { font-weight: 700; color: var(--ink); margin-right: 4px; }
+
+/* Big "add cards" choices */
+.add-opts { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
+.add-opts.two { grid-template-columns: 1.4fr 1fr; }
+.add-big { display: flex; align-items: center; gap: 12px; text-align: left; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; min-width: 0; transition: border-color .2s, transform .2s var(--ease), box-shadow .2s; }
+.add-big:hover { border-color: var(--accent); transform: translateY(-1px); }
+.add-big .ab-ic { width: 42px; height: 42px; flex: none; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink); }
+.add-big .ab-ic svg { width: 22px; height: 22px; }
+.add-big .ab-t { display: grid; gap: 2px; min-width: 0; }
+.add-big b { font-size: 15px; font-weight: 650; }
+.add-big small { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.add-big.hero { background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #b0204a)); border-color: transparent; color: #fff; box-shadow: 0 10px 24px -14px var(--accent); }
+.add-big.hero .ab-ic { background: rgba(255, 255, 255, .2); color: #fff; }
+.add-big.hero small { color: rgba(255, 255, 255, .85); }
+.add-big.wide { width: 100%; }
+@media (max-width: 640px) { .add-opts, .add-opts.two { grid-template-columns: minmax(0, 1fr); gap: 8px; } .add-big { padding: 12px; } }
 </style>
 </head>
 <body>
@@ -1852,10 +1868,10 @@ function renderDraft(keep) {
       </div>
     </div>
     <div class="gprog" id="gProg">${progressHTML()}</div>
-    <div class="gadd">
-      <button type="button" class="btn primary small" id="gPhotoBtn">${CAMERA}Add from a group photo</button>
-      <button type="button" class="btn ghost small" id="gMapBtn">${MAP_PIN}From the map</button>
-      <button type="button" class="btn ghost small" id="gAddBtn">${PLUS}Add a card</button>
+    <div class="add-opts">
+      <button type="button" class="add-big hero" id="gMapBtn"><span class="ab-ic">${MAP_PIN}</span><span class="ab-t"><b>From the map</b><small>Pubs, cafés, gyms and more, with photos</small></span></button>
+      <button type="button" class="add-big" id="gPhotoBtn"><span class="ab-ic">${CAMERA}</span><span class="ab-t"><b>From a group photo</b><small>One card per face</small></span></button>
+      <button type="button" class="add-big" id="gAddBtn"><span class="ab-ic">${PLUS}</span><span class="ab-t"><b>One at a time</b><small>A name and a photo</small></span></button>
     </div>
     <div id="placesSlot">${PS && PS.target.kind === "group" ? placesHTML(PS.target.slots()) : ""}</div>
     <div id="addSlot">${G.split ? splitHTML() : addPanelHTML()}</div>
@@ -2660,6 +2676,7 @@ function myDecksPanel() {
   return `
     <div class="panel" id="myDecks">
       <div class="panel-head"><h2>Your decks</h2><span class="head-btns"><button type="button" class="btn ghost small" id="newGroup">${GROUP_ICON}Make one with friends</button><button type="button" class="btn primary small" id="newDeck">${PLUS}Create a deck</button></span></div>
+      <button type="button" class="add-big hero wide" id="mapDeck"><span class="ab-ic">${MAP_PIN}</span><span class="ab-t"><b>Build a deck from the map</b><small>Search "pubs in Brixton" or "gyms in Leeds" and pick the places, photos included</small></span></button>
       <ul class="games-list" id="groupList"></ul>
       ${mine.length ? `<ul class="games-list">${mine.map(d => `
         <li class="gi-row"><button type="button" class="game-item" data-edit="${d.key}">
@@ -2673,6 +2690,7 @@ function myDecksPanel() {
 function wireMyDecks() {
   const nb = $("newDeck"); if (nb) nb.onclick = () => openEditor(null);
   const ng = $("newGroup"); if (ng) ng.onclick = () => openGroupSetup(null);
+  const md = $("mapDeck"); if (md) md.onclick = () => { openEditor(null); openPlaces(editorPlacesTarget()); };
   renderGroupList();
   app.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => openEditor(b.dataset.edit));
   app.querySelectorAll("[data-remove]").forEach(b => b.onclick = async () => {
@@ -2778,6 +2796,10 @@ function renderEditor(restored) {
         <div class="panel" id="cardsPanel">
           <div class="panel-head"><h2>Cards <span class="count" id="cardCount">${E.cards.length}</span></h2><span class="needs" id="needs"></span></div>
           <p>${MIN_CARDS}–${MAX_CARDS} cards. Add a photo to make them yours.</p>
+          <div class="add-opts two">
+            <button type="button" class="add-big hero" id="mapCardsTop"><span class="ab-ic">${MAP_PIN}</span><span class="ab-t"><b>From the map</b><small>Search Google Maps and add places with their photos</small></span></button>
+            <button type="button" class="add-big" id="addCardTop"><span class="ab-ic">${PLUS}</span><span class="ab-t"><b>Type one in</b><small>Any name, your own photo</small></span></button>
+          </div>
           <div id="placesSlot">${PS && PS.target.kind === "editor" ? placesHTML(PS.target.slots()) : ""}</div>
           <div class="card-eds">${E.cards.map((c, i) => cardEditorHTML(c, i)).join("")}</div>
           <div class="head-btns"><button type="button" class="btn ghost small" id="addCard" ${E.cards.length >= MAX_CARDS ? "disabled" : ""}>${PLUS}Add card</button><button type="button" class="btn ghost small" id="mapCards">${MAP_PIN}From the map</button></div>
@@ -2910,7 +2932,8 @@ function wireEditor() {
     }
   };
   $("saveDeck").onclick = saveDeck;
-  $("mapCards").onclick = () => openPlaces(editorPlacesTarget());
+  $("mapCards").onclick = $("mapCardsTop").onclick = () => openPlaces(editorPlacesTarget());
+  $("addCardTop").onclick = () => $("addCard").click();
   if (PS && PS.target.kind === "editor") wirePlaces();
   $("pvToggle").onclick = () => { const side = app.querySelector(".ed-side"), on = side.classList.toggle("show-pv"); $("pvToggle").setAttribute("aria-expanded", on); $("pvToggle").textContent = on ? "Hide" : "Preview"; };
 }
