@@ -122,7 +122,7 @@ button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent
 .card {
   background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
   box-shadow: var(--shadow); display: flex; flex-direction: column; min-width: 0;
-  transition: opacity .35s var(--ease), transform .35s var(--ease), filter .35s;
+  transition: opacity .35s var(--ease), transform .35s var(--ease);
 }
 .art {
   --h: 30;
@@ -135,7 +135,7 @@ button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent
 }
 .art::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, .28)); }
 .art-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-.chip { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: rgba(255, 255, 255, .2); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.chip { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: rgba(0, 0, 0, .22); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .code { font-family: var(--f-data); font-size: 11px; opacity: .8; }
 .stamp { display: none; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; background: #fff; color: #0f6b3d; }
 .card.stamped .code { display: none; }
@@ -179,7 +179,7 @@ button.row:not(:disabled):active { transform: scale(.985); }
 .row.draw { background: var(--draw-soft); border-color: color-mix(in srgb, var(--draw) 40%, transparent); }
 .row.draw .val, .row.draw .lbl { color: var(--draw); }
 .row.draw .track i { background: var(--draw); }
-.card.dim { opacity: .72; transform: scale(.975); filter: saturate(.65); }
+.card.dim { opacity: .66; transform: scale(.975); }
 
 /* Card back */
 .card-back {
@@ -322,7 +322,7 @@ button.row:not(:disabled):active { transform: scale(.985); }
 .slot.them.deal { animation-delay: .08s; }
 @keyframes deal { from { opacity: 0; transform: translateY(22px) scale(.96); } }
 .slot > .card { height: 100%; }
-.flipper { display: grid; height: 100%; transform-style: preserve-3d; transition: transform .7s var(--ease); }
+.flipper { display: grid; height: 100%; transform-style: preserve-3d; transition: transform .7s var(--ease); will-change: transform; }
 .flipper > .face { grid-area: 1 / 1; min-width: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .flipper > .face > .card { height: 100%; }
 .flipper > .front { transform: rotateY(180deg); }
@@ -357,7 +357,7 @@ button.row:not(:disabled):active { transform: scale(.985); }
 /* ---------- Game over ---------- */
 .over { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .result { position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 34px 20px 26px; display: grid; justify-items: center; gap: 14px; text-align: center; box-shadow: var(--shadow); }
-.result::before { content: ""; position: absolute; inset: -40% -20% auto; height: 120%; background: radial-gradient(closest-side, color-mix(in srgb, var(--glow, var(--accent)) 22%, transparent), transparent); z-index: 0; animation: glow 4s ease-in-out infinite alternate; }
+.result::before { content: ""; position: absolute; inset: -40% -20% auto; height: 120%; background: radial-gradient(closest-side, color-mix(in srgb, var(--glow, var(--accent)) 22%, transparent), transparent); z-index: 0; animation: glow 4s ease-in-out infinite alternate; will-change: transform, opacity; pointer-events: none; }
 .result > * { position: relative; }
 @keyframes glow { to { transform: translateY(8%) scale(1.06); } }
 .result h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(32px, 7vw, 52px); letter-spacing: -.04em; line-height: 1; animation: pop .6s var(--ease) both .1s; }
@@ -604,7 +604,7 @@ a.btn.ghost { color: var(--ink); }
 .table.multi .out-back { min-height: 220px; }
 .opps { order: -1; display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: 10px; }
 .opps.n2 { --cols: 2; } .opps.n3 { --cols: 3; } .opps.n4 { --cols: 4; } .opps.n5 { --cols: 3; }
-.opp { display: grid; gap: 6px; min-width: 0; animation: deal .5s var(--ease) both; transition: opacity .4s, transform .45s var(--ease), filter .4s; }
+.opp { display: grid; gap: 6px; min-width: 0; animation: deal .5s var(--ease) both; transition: opacity .4s, transform .45s var(--ease); }
 .opp:nth-child(2) { animation-delay: .05s; } .opp:nth-child(3) { animation-delay: .1s; } .opp:nth-child(4) { animation-delay: .15s; } .opp:nth-child(5) { animation-delay: .2s; } .opp:nth-child(6) { animation-delay: .25s; }
 .opp-card { aspect-ratio: 5 / 6; perspective: 900px; min-width: 0; }
 .opp-card > .flipper, .opp-card > .card-back { height: 100%; }
@@ -629,7 +629,7 @@ a.btn.ghost { color: var(--ink); }
 .opp.win .mval { color: var(--win); }
 .opp.win .mstamp { display: inline-block; animation: pop .45s var(--ease) both; }
 .opp.win { transform: translateY(-3px); }
-.opp.lose { opacity: .6; filter: saturate(.6); }
+.opp.lose { opacity: .5; }
 .opp.draw .mini-card { border-color: var(--draw); }
 .opp.draw .mval { color: var(--draw); }
 .table.multi.to-pot .slot, .table.multi.to-pot .opp, .table.multi.to-you .opp, .table.multi.to-them .opp, .table.multi.to-them .slot.you { transform: translateY(18px) scale(.95); opacity: 0; }
@@ -705,7 +705,8 @@ a.btn.ghost { color: var(--ink); }
 .rate-wrap { display: grid; gap: 8px; margin-inline: -16px; }
 .rate-track { display: grid; grid-auto-flow: column; grid-auto-columns: min(84vw, 340px); gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 16px 12px; scroll-padding-inline: 16px; scrollbar-width: none; overscroll-behavior-x: contain; }
 .rate-track::-webkit-scrollbar { display: none; }
-.rate-card { scroll-snap-align: start; display: flex; flex-direction: column; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); animation: pillIn .35s var(--ease) both; }
+.rate-card { scroll-snap-align: start; display: flex; flex-direction: column; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: 0 1px 2px rgba(17, 20, 29, .06), 0 8px 18px -12px rgba(17, 20, 29, .35); }
+.group.first .rate-card { animation: pillIn .35s var(--ease) both; }
 .rate-card.own { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
 .rc-art { position: relative; aspect-ratio: 16 / 10; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; color: #fff; overflow: hidden; isolation: isolate;
   background: radial-gradient(110% 90% at 92% 0%, hsl(var(--h) 100% 72% / .95) 0%, transparent 55%), radial-gradient(80% 90% at 0% 100%, hsl(calc(var(--h) - 34) 82% 44%) 0%, transparent 62%), linear-gradient(155deg, hsl(var(--h) 82% 56%), hsl(calc(var(--h) - 22) 72% 30%)); }
@@ -809,6 +810,12 @@ a.btn.ghost { color: var(--ink); }
 .sp-left { font-size: 12.5px; color: var(--muted); }
 .split .actions { gap: 10px; }
 @media (max-width: 520px) { .sp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+
+/* Pull to refresh */
+.ptr { position: fixed; left: 50%; top: env(safe-area-inset-top, 0px); z-index: 60; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--muted); border: 1px solid var(--line); box-shadow: var(--shadow); transform: translate(-50%, -48px); opacity: 0; transition: transform .25s var(--ease), opacity .2s, color .2s; pointer-events: none; }
+.ptr svg { width: 18px; height: 18px; }
+.ptr.ready { color: var(--accent); }
+.ptr.spinning svg { animation: spin .8s linear infinite; color: var(--accent); }
 </style>
 </head>
 <body>
@@ -1594,7 +1601,7 @@ function renderDraft(keep) {
   const track = $("rateTrack"), sx = track ? track.scrollLeft : 0, y = window.scrollY;
   const shown = G.members.slice(0, 8);
   app.innerHTML = `
-  <section class="group view">
+  <section class="group${keep ? "" : " view first"}">
     <div class="game-top"><button type="button" class="link" id="gBack">${BACK}Home</button><span class="deck-label">Group deck${d.deck_key ? " · published" : ""}</span></div>
     ${G.welcome ? `<div class="notebar"><span>You're in. Add cards for anyone missing, then rate everyone.</span><button type="button" class="link" id="gWelcomeX">Got it</button></div>` : ""}
     <div class="panel ghead">
@@ -3294,6 +3301,50 @@ document.addEventListener("keydown", e => {
   if (P.phase === "choose" && P.turn === "you" && /^[1-9]$/.test(e.key) && +e.key <= P.d.stats.length) { e.preventDefault(); pResolve(+e.key - 1); }
   else if (P.phase === "result" && (e.key === "Enter" || e.key === " ") && tag !== "button") { e.preventDefault(); pNext(); }
 });
+
+/* Pull down to refresh, in the installed app (browsers have their own) */
+(function pullToRefresh() {
+  const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+  if (!standalone || !("ontouchstart" in window)) return;
+  const ind = document.createElement("div"); ind.className = "ptr"; ind.setAttribute("aria-hidden", "true"); ind.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  document.body.appendChild(ind);
+  let y0 = null, x0 = 0, pull = 0, on = false, busyPtr = false;
+  const blocked = t => t.closest && t.closest("input, textarea, select, .rate-track, .sp-photo, .confirm");
+  addEventListener("touchstart", e => {
+    y0 = null;
+    if (busyPtr || window.scrollY > 2 || e.touches.length !== 1 || blocked(e.target)) return;
+    y0 = e.touches[0].clientY; x0 = e.touches[0].clientX; pull = 0; on = false;
+  }, { passive: true });
+  addEventListener("touchmove", e => {
+    if (y0 == null) return;
+    const dy = e.touches[0].clientY - y0, dx = Math.abs(e.touches[0].clientX - x0);
+    if (!on) { if (dy > 10 && dy > dx * 1.6 && window.scrollY <= 2) on = true; else if (dy < -4 || dx > 14) { y0 = null; return; } else return; }
+    pull = Math.min(120, dy * .5); ind.style.transition = "none";
+    ind.style.transform = `translate(-50%, ${pull - 48}px) rotate(${pull * 3}deg)`;
+    ind.style.opacity = Math.min(1, pull / 56);
+    ind.classList.toggle("ready", pull >= 62);
+  }, { passive: true });
+  const end = async () => {
+    if (y0 == null && !on) return;
+    y0 = null;
+    if (on && pull >= 62) {
+      busyPtr = true; ind.style.transition = ""; ind.classList.add("spinning"); ind.style.transform = "translate(-50%, 14px)"; ind.style.opacity = 1;
+      if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
+      try { await pullRefresh(); } catch (e) {}
+      busyPtr = false;
+    }
+    on = false; pull = 0; ind.style.transition = ""; ind.classList.remove("spinning", "ready"); ind.style.transform = ""; ind.style.opacity = 0;
+  };
+  addEventListener("touchend", end, { passive: true }); addEventListener("touchcancel", end, { passive: true });
+})();
+async function pullRefresh() {
+  if (offline || !sb) { location.reload(); return new Promise(() => {}); }
+  if (P || isLocal() || E) return;                      // practice and the deck editor are local: nothing to fetch
+  if (gameId) { renderedKey = ""; return refresh(); }
+  if (G) { await loadDraft(); if (G && G.d) renderDraft(true); return; }
+  try { await loadDecks(); } catch (e) {}
+  return home();
+}
 
 boot();
 
