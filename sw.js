@@ -1,5 +1,5 @@
 /* StatAttack service worker: works offline for practice, shows turn alerts. */
-const VERSION = "sa-v5";
+const VERSION = "sa-v6";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-32.png", "icons/icon-180.png"];
 const LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";
 

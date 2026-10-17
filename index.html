@@ -1838,7 +1838,7 @@ function orderFaces(bs) {
 }
 // a card-shaped crop around a face, with room for hair and shoulders
 function faceCrop(img, b) {
-  let w = Math.max(b.w, b.h) * 2.7, h = w * .66;
+  let w = Math.max(b.w, b.h) * 2.2, h = w * .66;
   if (w > img.width) { w = img.width; h = w * .66; }
   if (h > img.height) { h = img.height; w = h / .66; }
   let x = b.x + b.w / 2 - w / 2, y = b.y + b.h * .62 - h / 2;
