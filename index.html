@@ -278,6 +278,7 @@ button.row:not(:disabled):active { transform: scale(.985); }
 .pcount { font-size: 12.5px; color: var(--muted); }
 .pcount span { font-family: var(--f-data); font-weight: 600; color: var(--ink); display: inline-block; font-variant-numeric: tabular-nums; }
 .pcount span.bump { animation: bump .5s var(--ease); }
+.pcount i.pl { font-style: normal; }
 @keyframes bump { 40% { transform: scale(1.45); color: var(--accent); } }
 .round { text-align: center; display: grid; justify-items: center; gap: 2px; }
 .round small { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
@@ -1100,7 +1101,10 @@ let installPrompt = null, isGuest = true, myEmail = "", authNotice = "", emailMo
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
   navigator.serviceWorker.addEventListener("message", e => {
-    if (e.data && e.data.type === "open") { const id = new URL(e.data.url).searchParams.get("game"); if (id && sb && !offline) openGame(id); }
+    if (e.data && e.data.type === "open") {
+      const q = new URL(e.data.url).searchParams, id = q.get("game"), dr = q.get("draft");
+      if (id && sb && !offline) openGame(id); else if (dr && sb && !offline) openDraft(dr);
+    }
   });
 }
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; refreshInstallSlot(); });
@@ -1183,6 +1187,10 @@ async function renderAlertsRow() {
     ${st === "on" ? `<button type="button" class="btn ghost small" id="alertsOff">Turn off</button>` : st === "off" ? `<button type="button" class="btn primary small" id="alertsOn">Turn on</button>` : ""}`;
   if ($("alertsOn")) $("alertsOn").onclick = async () => { $("alertsOn").disabled = true; await enableAlerts(); renderAlertsRow(); };
   if ($("alertsOff")) $("alertsOff").onclick = async () => { await disableAlerts(); renderAlertsRow(); };
+}
+function notifyGroup(draftId, kind) {
+  if (!sb || offline) return;
+  try { sb.functions.invoke("notify", { body: { draft_id: draftId, kind } }).catch(() => {}); } catch (e) {}
 }
 function notifyOpponent(id) {
   if (!sb || offline || !id) return;
@@ -1469,6 +1477,7 @@ async function loadDraft() {
 function leaveDraft() {
   if (!G) return;
   Object.keys(G.pend).forEach(cid => { clearTimeout(G.pend[cid]); saveRating(cid); });
+  if (G.notifyT) { clearTimeout(G.notifyT); notifyGroup(G.id, "cards"); }
   if (G.chan) sb.removeChannel(G.chan);
   clearTimeout(gTimer); G = null;
 }
@@ -1699,6 +1708,7 @@ function wirePublish() {
     const { data, error } = await sb.rpc("publish_draft", { p_draft: G.id });
     if (error) { pub.disabled = false; return toast(errMsg(error)); }
     try { await loadDecks(); } catch (e) {}
+    notifyGroup(G.id, "published");
     toast(G.d.deck_key ? "Deck updated" : "Published. Everyone in the group can play it now");
     await loadDraft(); renderDraft(true);
     $("pubPanel")?.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
@@ -1772,6 +1782,7 @@ function wireCardForm() {
       : await sb.rpc("add_draft_card", { p_draft: G.id, p_name: f.name.trim(), p_image: f.image, p_is_me: !!f.isMe });
     if (error) { b.disabled = false; return toast(errMsg(error)); }
     const edited = f.edit;
+    if (!edited) { clearTimeout(G.notifyT); const gid = G.id; G.notifyT = setTimeout(() => notifyGroup(gid, "cards"), 20000); }
     toast(edited ? "Card saved" : `${f.name.trim()} added`);
     // keep the form open for the next card when adding
     G.form = edited ? null : { name: "", image: null, isMe: false };
@@ -1959,6 +1970,7 @@ async function saveSplit() {
   if (!G || G.split !== sp) return;
   const remaining = sp.faces.filter(f => f.on && !f.added).length;
   if (!remaining) G.split = null; else { sp.faces = sp.faces.filter(f => !f.added); sp.me = -1; }
+  if (done) notifyGroup(G.id, "cards");
   toast(done ? `${done} card${done === 1 ? "" : "s"} added` : "No cards were added");
   await loadDraft(); if (!G) return;
   renderDraft(true);
@@ -1970,8 +1982,8 @@ async function boot() {
   app.innerHTML = `<div class="loading view"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><span>Connecting…</span></div>`;
   if (!window.supabase) return goOffline("The online service didn't load. Check your connection and refresh to play friends.");
   readAuthReturn();
-  const openId = new URLSearchParams(location.search).get("game");
-  if (openId) history.replaceState(null, "", location.pathname + location.hash);
+  const openId = new URLSearchParams(location.search).get("game"), openDraftId = new URLSearchParams(location.search).get("draft");
+  if (openId || openDraftId) history.replaceState(null, "", location.pathname + location.hash);
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   let session = null;
   try { ({ data: { session } } = await sb.auth.getSession()); } catch (e) {}
@@ -1998,6 +2010,7 @@ async function boot() {
   myName = p?.display_name || ""; if (myName) names[me] = myName;
   if (!myName && !isGuest && session.user.user_metadata && session.user.user_metadata.full_name) await saveName(String(session.user.user_metadata.full_name).split(" ")[0]);
   if (openId && /^[0-9a-f-]{36}$/i.test(openId)) return openGame(openId);
+  if (openDraftId && /^[0-9a-f-]{36}$/i.test(openDraftId)) return openDraft(openDraftId);
   const code = (location.hash || "").slice(1).toUpperCase();
   if (/^DECK-[A-Z0-9]{6}$/.test(code)) {
     history.replaceState(null, "", location.pathname + location.search);
@@ -2254,7 +2267,6 @@ function problems() {
   E.stats.forEach((s, i) => { if (!s.label.trim()) out.push({ msg: `Stat ${i + 1} needs a name`, sel: `[data-sl="${i}"]` }); });
   const n = E.cards.length;
   if (n < MIN_CARDS) out.push({ msg: `Add ${MIN_CARDS - n} more card${MIN_CARDS - n === 1 ? "" : "s"} (at least ${MIN_CARDS})`, sel: "#addCard" });
-  else if (n % 2) out.push({ msg: "Add or remove one card: decks need an even number", sel: "#addCard" });
   E.cards.forEach((c, i) => {
     if (!c.name.trim()) out.push({ msg: `Card ${i + 1} needs a name`, sel: `[data-cn="${i}"]` });
     E.stats.forEach((s, j) => { if (!Number.isFinite(parseNum(c.vals[j]))) out.push({ msg: `${c.name.trim() || `Card ${i + 1}`} needs a number for ${s.label.trim() || `stat ${j + 1}`}`, sel: `[data-cv="${i}-${j}"]` }); });
@@ -2296,7 +2308,7 @@ function renderEditor(restored) {
 
         <div class="panel" id="cardsPanel">
           <div class="panel-head"><h2>Cards <span class="count" id="cardCount">${E.cards.length}</span></h2><span class="needs" id="needs"></span></div>
-          <p>${MIN_CARDS}–${MAX_CARDS} cards, an even number so both players start level. Add a photo to make them yours.</p>
+          <p>${MIN_CARDS}–${MAX_CARDS} cards. Add a photo to make them yours.</p>
           <div class="card-eds">${E.cards.map((c, i) => cardEditorHTML(c, i)).join("")}</div>
           <button type="button" class="btn ghost small" id="addCard" ${E.cards.length >= MAX_CARDS ? "disabled" : ""}>${PLUS}Add card</button>
         </div>
@@ -2359,7 +2371,7 @@ function updateNeeds() {
   const n = E.cards.length, p = problems();
   $("cardCount").textContent = n;
   const needs = $("needs");
-  needs.textContent = n < MIN_CARDS ? `${MIN_CARDS - n} more needed` : n % 2 ? "needs an even number" : "";
+  needs.textContent = n < MIN_CARDS ? `${MIN_CARDS - n} more needed` : "";
   const note = $("saveNote");
   note.textContent = p.length ? (E.tried ? `${p[0].msg}${p.length > 1 ? ` · ${p.length - 1} more to fix` : ""}` : `Next: ${p[0].msg.charAt(0).toLowerCase() + p[0].msg.slice(1)}`) : `${n} cards · ready to save`;
   note.classList.toggle("ok", !p.length);
@@ -2499,7 +2511,7 @@ function leaveGame() {
   if (typeof E !== "undefined" && E) { clearTimeout(draftTimer); persistDraft(); E = null; }
   if (gameChan) { sb.removeChannel(gameChan); gameChan = null; }
   if (homeChan) { sb.removeChannel(homeChan); homeChan = null; }
-  clearInterval(tick); tick = 0; gameId = null; V = null; renderedKey = ""; queue = []; skipped = 0;
+  clearInterval(tick); tick = 0; gameId = null; V = null; L = null; renderedKey = ""; queue = []; skipped = 0;
 }
 async function openGame(id) {
   leaveGame();
@@ -2515,6 +2527,7 @@ async function openGame(id) {
 
 let refreshing = false, refreshAgain = false;
 async function refresh() {
+  if (isLocal()) return localRefresh();
   if (!gameId) return;
   if (refreshing) { refreshAgain = true; return; }
   refreshing = true;
@@ -2555,7 +2568,7 @@ const normRound = r => r.cards ? r : { ...r, cards: [r.c1, r.c2], vals: [r.v1, r
 const nameOf = id => esc(names[id] || "Player");
 
 function topBar(d) {
-  return `<div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="top-actions"><span class="deck-label">${esc(d.name)} · ${timerLabel(V.game.timer_secs)} turns</span>${amOut() && V.game.status === "active" ? "" : `<button type="button" class="link danger" id="forfeitBtn">Forfeit</button>`}</span></div>`;
+  return `<div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="top-actions"><span class="deck-label">${esc(d.name)} · ${V.local ? `vs ${seats().length - 1} computers` : `${timerLabel(V.game.timer_secs)} turns`}</span>${amOut() && V.game.status === "active" ? "" : `<button type="button" class="link danger" id="forfeitBtn">Forfeit</button>`}</span></div>`;
 }
 function wireTop() { $("leave").onclick = () => home(); if ($("forfeitBtn")) $("forfeitBtn").onclick = forfeit; }
 
@@ -2582,7 +2595,7 @@ function shellMulti(d) {
   const chips = seats().map((id, i) => `
       <div class="pchip${id === me ? " you" : ""}" id="pc${i}" style="--them:${seatColor(i)}">
         <span class="av-wrap"><span class="avatar${id === me ? "" : " them"}">${id === me ? ME : initial(names[id])}</span>${RING("ring" + i)}</span>
-        <span class="pinfo"><b>${id === me ? "You" : nameOf(id)}</b><span class="pcount"><span id="cnt${i}">0</span> cards</span></span>
+        <span class="pinfo"><b>${id === me ? "You" : nameOf(id)}</b><span class="pcount"><span id="cnt${i}">0</span><i class="pl" id="pl${i}"> cards</i></span></span>
       </div>`).join("");
   return `
   <section class="game view multi">
@@ -2611,6 +2624,7 @@ function confirmBar(text, yesLabel, onYes, noLabel) {
   bar.querySelector("[data-no]").focus();
 }
 async function forfeit() {
+  if (isLocal()) return confirmBar("Leave this practice game?", "Leave", async () => home(), "Keep playing");
   const alive = seats().filter((id, i) => id !== me && countAt(i) > 0);
   const text = alive.length > 1
     ? "Forfeit this game? Your cards go in the pot and everyone else plays on."
@@ -2636,6 +2650,7 @@ function updateBoard() {
     const out = g.out_players || [];
     seats().forEach((id, i) => {
       bumpSet("cnt" + i, countAt(i));
+      const pl = $("pl" + i); if (pl) pl.textContent = countAt(i) === 1 ? " card" : " cards";
       const chip = $("pc" + i); if (!chip) return;
       chip.classList.toggle("active", showTurn && g.turn === id);
       chip.classList.toggle("out", g.status !== "waiting" && (countAt(i) === 0 || out.includes(id)));
@@ -2721,6 +2736,7 @@ async function play(i) {
   const row = $("sYou").querySelector(`[data-i="${i}"]`); row?.classList.add("picked");
   $("sYou").querySelector(".stats")?.classList.remove("prompt");
   setStatus("wait", `You played <b>${esc(DECKS[V.game.deck_key].stats[i].label)}</b>`);
+  if (isLocal()) { localResolve(i, false); busy = false; return localRefresh(); }
   const { error } = await sb.rpc("play_stat", { p_game: gameId, p_stat: i });
   if (!error) notifyOpponent(gameId);
   busy = false;
@@ -2898,6 +2914,7 @@ function wireOver(g) {
   $("leave").onclick = $("home2").onclick = () => home();
   if ($("toRematch")) $("toRematch").onclick = () => openGame(g.rematch_id);
   if ($("rematch")) $("rematch").onclick = async () => {
+    if (isLocal()) return startGroupPractice(L.key, L.bots);
     const { data, error } = await sb.rpc("rematch", { p_game: g.id });
     if (error) return toast(errMsg(error));
     notifyOpponent(data.game.id);
@@ -2911,7 +2928,7 @@ function renderOver() {
   <section class="over view">
     <div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="deck-label">${esc(d.name)}</span></div>
     <div class="result" style="--glow:${won ? "var(--accent)" : tie ? "var(--draw)" : "var(--them)"}">
-      <p class="eyebrow">${esc(d.name)} · ${g.forfeited_by ? (g.forfeited_by === me ? "you forfeited" : `${esc(opp)} forfeited`) : `${g.round - 1} rounds`}</p>
+      <p class="eyebrow">${esc(d.name)} · ${g.forfeited_by ? (g.forfeited_by === me ? "you forfeited" : `${esc(opp)} forfeited`) : `${g.round - 1} round${g.round - 1 === 1 ? "" : "s"}`}</p>
       <h1>${won ? "You win" : tie ? "All square" : `${esc(opp)} wins`}</h1>
       <div class="final"><div><span class="avatar">${ME}</span><b>${y}</b></div><span class="dash">–</span><div><b>${o}</b><span class="avatar them">${initial(opp)}</span></div></div>
       <div class="tug" aria-hidden="true"><i style="width:${y / total * 100}%"></i></div>
@@ -2924,13 +2941,13 @@ function renderOverMulti() {
   const g = V.game, d = DECKS[g.deck_key], S = seats(), total = d.cards.length, won = g.winner === me, tie = !g.winner;
   const left = g.out_players || [];
   const order = S.map((id, i) => ({ id, i, n: countAt(i), gone: left.includes(id) }))
-    .sort((a, b) => (b.id === g.winner) - (a.id === g.winner) || b.n - a.n || a.gone - b.gone || a.i - b.i);
+    .sort((a, b) => (b.id === g.winner) - (a.id === g.winner) || a.gone - b.gone || b.n - a.n || a.i - b.i);
   const glow = won ? "var(--accent)" : tie ? "var(--draw)" : seatColor(S.indexOf(g.winner));
   app.innerHTML = `
   <section class="over view">
     <div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="deck-label">${esc(d.name)}</span></div>
     <div class="result" style="--glow:${glow}">
-      <p class="eyebrow">${esc(d.name)} · ${S.length} players · ${g.round - 1} rounds</p>
+      <p class="eyebrow">${esc(d.name)} · ${S.length} players · ${g.round - 1} round${g.round - 1 === 1 ? "" : "s"}</p>
       <h1>${won ? "You win" : tie ? "All square" : `${nameOf(g.winner)} wins`}</h1>
       <ol class="ranks">${order.map((p, k) => `
         <li class="rank${p.id === me ? " you" : ""}${p.id === g.winner ? " top" : ""}" style="--them:${seatColor(p.i)};--d:${k * 70}ms">
@@ -2962,6 +2979,7 @@ function clock() {
   const pill = $("pill"); if (pill && g.turn === me) { pill.classList.toggle("hurry", urgent); pill.classList.toggle("turn", !urgent); }
   if (left < -400 && claimedFor !== g.turn_deadline) {
     claimedFor = g.turn_deadline;
+    if (isLocal()) { if (L && L.g.status === "active") { localResolve(Math.floor(Math.random() * DECKS[g.deck_key].stats.length), true); localRefresh(); } return; }
     const gid = gameId;
     sb.rpc("claim_timeout", { p_game: gid }).then(() => { notifyOpponent(gid); refresh(); });
   }
@@ -2982,10 +3000,78 @@ document.addEventListener("keydown", e => {
 });
 
 
+
+/* ---------- Practice against 2-5 computers: the group table, run on a local copy of the server's rules ---------- */
+const BOT_NAMES = ["Robo", "Pixel", "Byte", "Turbo", "Chip"];
+let L = null;
+const isLocal = () => gameId === "local";
+function startGroupPractice(key, bots) {
+  leaveGame();
+  if (!me) me = "local-you";
+  const d = DECKS[key], n = d.cards.length, players = [me, ...BOT_NAMES.slice(0, bots).map((_, i) => "bot-" + i)];
+  players.forEach((id, i) => { if (i) names[id] = BOT_NAMES[i - 1]; });
+  if (!names[me]) names[me] = myName || "You";
+  const order = shuffle([...Array(n).keys()]);
+  L = { key, bots, unseen: [], botFor: 0,
+    h: { piles: players.map((_, s) => order.filter((_, k) => k % players.length === s)), pot: [] },
+    g: { id: "local", deck_key: key, players, max_players: players.length, out_players: [], status: "active", round: 1, last_round: null, winner: null, rematch_id: null, forfeited_by: null,
+      timer_secs: practiceSecs || 86400, turn: players[Math.floor(Math.random() * players.length)], turn_deadline: null, counts: [], pot_count: 0 } };
+  localCounts(); localDeadline();
+  gameId = "local"; queue = []; skipped = 0; renderedKey = "";
+  app.innerHTML = "";
+  localRefresh();
+  tick = setInterval(clock, 250);
+}
+function localCounts() { const g = L.g, h = L.h; g.counts = h.piles.map(p => p.length); g.p1_count = g.counts[0]; g.p2_count = g.counts[1]; g.pot_count = h.pot.length; }
+function localDeadline(extra = 0) { L.g.turn_deadline = practiceSecs && L.g.status === "active" ? new Date(Date.now() + practiceSecs * 1000 + extra).toISOString() : null; }
+function localResolve(stat, auto) {
+  const g = L.g, h = L.h, d = DECKS[g.deck_key], low = !!d.stats[stat].low;
+  const cards = h.piles.map(p => p.length ? p.shift() : null), vals = cards.map(c => c == null ? null : d.cards[c][stat + 1]);
+  const played = vals.filter(x => x != null), best = low ? Math.min(...played) : Math.max(...played);
+  const w = vals.filter(x => x === best).length === 1 ? vals.indexOf(best) : null;
+  const order = cards.map((c, i) => ({ c, i })).filter(x => x.c != null).sort((a, b) => (b.i === w) - (a.i === w) || a.i - b.i).map(x => x.c);
+  if (w == null) h.pot.push(...order); else { h.piles[w].push(...order, ...h.pot); h.pot = []; }
+  localCounts();
+  const alive = g.counts.filter(c => c > 0).length, np = g.players.length, done = alive <= 1 || g.round >= 40 + 10 * (np - 2);
+  let win = null, nxt = null;
+  if (done) {
+    if (alive === 1) { const ls = g.counts.findIndex(c => c > 0); win = g.players[ls]; h.piles[ls].push(...h.pot); h.pot = []; localCounts(); }
+    else if (alive > 1) { const m = Math.max(...g.counts); if (g.counts.filter(c => c === m).length === 1) win = g.players[g.counts.indexOf(m)]; }
+  } else if (w != null) nxt = g.players[w];
+  else if (g.counts[g.players.indexOf(g.turn)] > 0) nxt = g.turn;
+  else { const from = g.players.indexOf(g.turn); for (let k = 1; k <= np; k++) { const j = (from + k) % np; if (g.counts[j] > 0) { nxt = g.players[j]; break; } } }
+  L.unseen.push({ game_id: "local", round: g.round, by_player: g.turn, stat, auto, cards, vals, winner_seat: w });
+  Object.assign(g, { turn: done ? null : nxt, round: g.round + 1, status: done ? "finished" : "active", winner: win });
+  localDeadline(4000);
+}
+function localRefresh() {
+  if (!L) return;
+  const g = L.g, seat = g.players.indexOf(me);
+  V = { local: true, game: { ...g, counts: g.counts.slice(), out_players: g.out_players.slice() }, seat, me: "p1",
+    my_top: g.status === "active" && L.h.piles[seat].length ? L.h.piles[seat][0] : null, server_now: new Date().toISOString() };
+  clockOffset = 0;
+  if (!queue.length && L.unseen.length) { queue = [L.unseen[L.unseen.length - 1]]; skipped = L.unseen.length - 1; L.unseen = []; }
+  render();
+  // computers take their turn once the table is showing
+  if (g.status === "active" && g.turn !== me && !queue.length && L.botFor !== g.round) {
+    L.botFor = g.round;
+    const round = g.round, cap = practiceSecs ? practiceSecs * 1000 - 600 : 4000;
+    setTimeout(() => { if (L && L.g.round === round && L.g.status === "active" && isLocal()) { localResolve(localBotPick(), false); localRefresh(); } }, reduceMotion ? 300 : Math.min(cap, 1300 + Math.random() * 1500));
+  }
+}
+function localBotPick() {
+  const g = L.g, d = DECKS[g.deck_key], c = d.cards[L.h.piles[g.players.indexOf(g.turn)][0]];
+  if (Math.random() < .2) return Math.floor(Math.random() * d.stats.length);
+  let best = 0, top = -1;
+  d.stats.forEach((_, i) => { const sc = strength(d, i, c[i + 1]); if (sc > top) { top = sc; best = i; } });
+  return best;
+}
+
 /* ---------- Play the computer (offline practice, same rules as online) ---------- */
 const PRACTICE_TIMERS = [10, 15, 30, 0];
 const BOT = "Computer";
 let P = null, pGen = 0, pRaf = 0;
+let practiceBots = (() => { const n = Number(store.get("sa-pbots")); return n >= 1 && n <= 5 ? n : 1; })();
 let practiceSecs = (() => { const raw = store.get("sa-ptimer"); const v = raw === null ? NaN : Number(raw); return PRACTICE_TIMERS.includes(v) ? v : 15; })();
 const pLater = (ms, fn) => { const g = pGen; setTimeout(() => { if (g === pGen) fn(); }, reduceMotion ? 30 : ms); };
 const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -2994,9 +3080,14 @@ function practicePanel() {
   return `
     <div class="panel">
       <h2>Play the computer</h2>
-      <p>Practise against the computer. No internet or friends needed.</p>
-      <div class="setup"><span class="section-title" id="ptimerLbl">Turn timer</span>
-        <div class="seg" role="radiogroup" aria-labelledby="ptimerLbl">${PRACTICE_TIMERS.map(t => `<input type="radio" name="ptimer" id="ptimer${t}" value="${t}" ${t === practiceSecs ? "checked" : ""}><label for="ptimer${t}">${t ? t + "s" : "Off"}</label>`).join("")}</div>
+      <p>Practise against up to five computers. No internet or friends needed.</p>
+      <div class="setup-row">
+        <div class="setup"><span class="section-title" id="pbotsLbl">Computers</span>
+          <div class="seg" role="radiogroup" aria-labelledby="pbotsLbl">${[1, 2, 3, 4, 5].map(n => `<input type="radio" name="pbots" id="pbots${n}" value="${n}" ${n === practiceBots ? "checked" : ""}><label for="pbots${n}">${n}</label>`).join("")}</div>
+        </div>
+        <div class="setup"><span class="section-title" id="ptimerLbl">Turn timer</span>
+          <div class="seg" role="radiogroup" aria-labelledby="ptimerLbl">${PRACTICE_TIMERS.map(t => `<input type="radio" name="ptimer" id="ptimer${t}" value="${t}" ${t === practiceSecs ? "checked" : ""}><label for="ptimer${t}">${t ? t + "s" : "Off"}</label>`).join("")}</div>
+        </div>
       </div>
       <div class="row-form">${(offline ? Object.values(DECKS) : playableDecks()).map(d => `<button type="button" class="btn ghost small" data-practice="${d.key}">${esc(d.name)}${ARROW}</button>`).join("")}</div>
     </div>`;
@@ -3004,7 +3095,8 @@ function practicePanel() {
 function wirePractice() {
   app.querySelectorAll("[data-practice]").forEach(b => b.onclick = () => {
     const t = app.querySelector('input[name="ptimer"]:checked'); practiceSecs = t ? +t.value : 15; store.set("sa-ptimer", practiceSecs);
-    startPractice(b.dataset.practice);
+    const pb = app.querySelector('input[name="pbots"]:checked'); practiceBots = pb ? +pb.value : 1; store.set("sa-pbots", practiceBots);
+    if (practiceBots > 1) startGroupPractice(b.dataset.practice, practiceBots); else startPractice(b.dataset.practice);
   });
 }
 function stopPractice() { pGen++; cancelAnimationFrame(pRaf); pRaf = 0; P = null; }
