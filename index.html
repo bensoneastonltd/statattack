@@ -668,6 +668,107 @@ a.btn.ghost { color: var(--ink); }
   .pchip .pcount { font-size: 11.5px; }
   .rank { grid-template-columns: 1.2em auto minmax(0, 1fr) 54px 2em; gap: 7px; }
 }
+
+/* ---------- Group decks ---------- */
+.head-btns { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.head-btns .btn svg { width: 17px; height: 17px; }
+#groupList:empty { display: none; }
+.avatar.deck-dot svg { width: 18px; height: 18px; }
+.avatar.big { width: 52px; height: 52px; border-radius: 16px; }
+.avatar.big svg { width: 26px; height: 26px; }
+.ghero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; }
+.ghero h1 { margin: 0 0 4px; font-family: var(--f-display); font-weight: 600; font-size: clamp(20px, 4.4vw, 26px); letter-spacing: -.03em; }
+.ghero p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.se.gse { grid-template-columns: minmax(0, 1fr) auto auto; }
+.se.gse .toggle { grid-column: auto; }
+.se.gse .icon-btn { grid-row: auto; grid-column: auto; }
+@media (max-width: 420px) { .se.gse .toggle span { font-size: 12px; } .se.gse { gap: 6px; } }
+.group { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.ghead { gap: 12px; }
+.ghead-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.ghead-txt h2 { font-size: 20px; }
+.ghead-txt p { font-size: 13.5px; margin-top: 2px; }
+.gmembers { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.gmembers .stack { display: inline-flex; }
+.gmembers .stack .avatar { width: 28px; height: 28px; margin-left: -7px; box-shadow: 0 0 0 2px var(--surface); }
+.gmembers .stack .avatar:first-child { margin-left: 0; }
+.gm-txt { font-size: 13.5px; font-weight: 500; color: var(--muted); flex: 1; }
+.ginvite { display: grid; gap: 10px; justify-items: start; padding: 12px; border-radius: 14px; background: var(--surface-2); }
+.ginvite .link { font-family: var(--f-data); font-size: 12px; word-break: break-all; padding: 0; user-select: all; }
+.ginvite .actions { justify-content: flex-start; min-height: 0; }
+.gprog { display: grid; gap: 7px; padding: 0 4px; }
+.gprog-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; font-weight: 500; }
+.gprog-row .count { font-size: 12px; }
+.gbar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.gbar i { display: block; height: 100%; background: var(--accent); border-radius: inherit; transition: width .5s var(--ease); }
+.rate-wrap { display: grid; gap: 8px; margin-inline: -16px; }
+.rate-track { display: grid; grid-auto-flow: column; grid-auto-columns: min(84vw, 340px); gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 16px 12px; scroll-padding-inline: 16px; scrollbar-width: none; overscroll-behavior-x: contain; }
+.rate-track::-webkit-scrollbar { display: none; }
+.rate-card { scroll-snap-align: start; display: flex; flex-direction: column; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); animation: pillIn .35s var(--ease) both; }
+.rate-card.own { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.rc-art { position: relative; aspect-ratio: 16 / 10; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; color: #fff; overflow: hidden; isolation: isolate;
+  background: radial-gradient(110% 90% at 92% 0%, hsl(var(--h) 100% 72% / .95) 0%, transparent 55%), radial-gradient(80% 90% at 0% 100%, hsl(calc(var(--h) - 34) 82% 44%) 0%, transparent 62%), linear-gradient(155deg, hsl(var(--h) 82% 56%), hsl(calc(var(--h) - 22) 72% 30%)); }
+.rc-art::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, .35)); }
+.rc-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.rc-mono { position: absolute; inset: 0; z-index: -1; display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 64px; letter-spacing: -.04em; opacity: .32; }
+.rc-top { display: flex; justify-content: space-between; gap: 6px; }
+.rc-top .chip { display: inline-block; }
+.me-chip { background: rgba(255, 255, 255, .9) !important; color: #11141d; }
+.rc-art h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 21px; line-height: 1.1; letter-spacing: -.015em; text-shadow: 0 1px 14px rgba(0, 0, 0, .25); }
+.rc-body { display: grid; gap: 12px; padding: 14px 14px 8px; flex: 1; align-content: start; }
+.rc-own { margin: 0; font-size: 13px; color: var(--muted); padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); }
+.rrow { display: grid; gap: 6px; }
+.rlbl { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 600; }
+.rlbl .low { margin-left: 4px; }
+.ravg { font-size: 12px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+.ravg b { font-family: var(--f-data); color: var(--ink); font-weight: 600; }
+.rslide { display: grid; grid-template-columns: minmax(0, 1fr) 2.2em; gap: 10px; align-items: center; }
+.rslide output { font-family: var(--f-data); font-weight: 600; font-size: 17px; text-align: right; font-variant-numeric: tabular-nums; }
+.rslide input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; margin: 0; cursor: pointer; touch-action: pan-x; }
+.rslide input[type=range]::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--accent) var(--p), var(--line) var(--p)); }
+.rslide input[type=range]::-moz-range-track { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--accent) var(--p), var(--line) var(--p)); }
+.rslide input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -8px; border-radius: 50%; background: #fff; border: 2px solid var(--accent); box-shadow: 0 2px 6px rgba(0, 0, 0, .18); transition: transform .15s; }
+.rslide input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--accent); box-shadow: 0 2px 6px rgba(0, 0, 0, .18); }
+.rslide input[type=range]:active::-webkit-slider-thumb { transform: scale(1.12); }
+.rslide input.unset::-webkit-slider-runnable-track { background: var(--line); }
+.rslide input.unset::-moz-range-track { background: var(--line); }
+.rslide input.unset::-webkit-slider-thumb { border-color: var(--line-strong); }
+.rslide input.unset::-moz-range-thumb { border-color: var(--line-strong); }
+.rslide input.unset + output { color: var(--muted); }
+.rslide input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.rbarx { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.rbarx i { display: block; height: 100%; background: var(--them); border-radius: inherit; transition: width .5s var(--ease); }
+.rc-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 14px 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.rc-acts { display: inline-flex; gap: 12px; }
+.rc-acts .link.sure { color: #fff; background: var(--lose); padding: 2px 8px; border-radius: 999px; }
+.add-tile { display: grid; place-content: center; justify-items: center; gap: 6px; min-height: 280px; border: 1.5px dashed var(--line-strong); background: transparent; box-shadow: none; color: var(--muted); cursor: pointer; font: inherit; transition: border-color .2s, color .2s; }
+.add-tile:hover { border-color: var(--accent); color: var(--accent); }
+.add-tile svg { width: 26px; height: 26px; }
+.add-tile b { font-size: 16px; color: var(--ink); }
+.add-tile span { font-size: 13px; }
+.rate-nav { display: flex; justify-content: center; align-items: center; gap: 12px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.rate-nav .icon-btn { border: 1px solid var(--line); background: var(--surface); }
+.rate-nav .icon-btn:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+#rPos { min-width: 6em; text-align: center; font-variant-numeric: tabular-nums; }
+.addcard { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); animation: pillIn .3s var(--ease) both; }
+.ac-row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: start; }
+.ac-main { display: grid; gap: 8px; min-width: 0; }
+.addcard .actions { justify-content: flex-start; min-height: 0; }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13.5px; color: var(--muted); }
+.checks li.ok { color: var(--win); }
+.checks b { color: var(--ink); font-weight: 600; }
+#pubPanel .actions { justify-content: flex-start; min-height: 0; }
+.btn:disabled { opacity: .45; cursor: default; transform: none; box-shadow: none; }
+.gfoot { text-align: center; }
+@media (min-width: 760px) {
+  .rate-wrap { margin-inline: 0; }
+  .rate-track { padding-inline: 2px; scroll-padding-inline: 2px; grid-auto-columns: 320px; }
+}
+@media (max-width: 520px) {
+  .ghead-top { grid-template-columns: auto minmax(0, 1fr); }
+  .ghead-top #gSettings { grid-column: 1 / -1; justify-self: start; }
+  .head-btns { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -729,7 +830,7 @@ async function loadDecks() {
   ]);
   if (e1 || e2) throw (e1 || e2);
   DECKS = {};
-  decks.forEach(d => { DECKS[d.key] = { key: d.key, name: d.name, blurb: d.blurb, hues: [d.hue_from, d.hue_to], stats: d.stats, cards: [], images: [], owner: d.owner || null, custom: !!d.owner, archived: !!d.archived }; });
+  decks.forEach(d => { DECKS[d.key] = { key: d.key, name: d.name, blurb: d.blurb, hues: [d.hue_from, d.hue_to], stats: d.stats, cards: [], images: [], owner: d.owner || null, custom: !!d.owner, archived: !!d.archived, group: !!d.draft_id, draftId: d.draft_id || null }; });
   cards.forEach(c => { if (DECKS[c.deck_key]) { DECKS[c.deck_key].cards[c.idx] = [c.name, ...c.vals.map(Number)]; DECKS[c.deck_key].images[c.idx] = c.image_url || null; } });
 }
 async function loadNames(ids) {
@@ -1178,6 +1279,467 @@ function readAuthReturn() {
   history.replaceState(null, "", location.pathname);
 }
 
+
+/* ---------- Group decks: friends add cards together, everyone rates 1-10, the averages become the deck ---------- */
+let G = null, gTimer = 0;
+const GROUP_ICON = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="7" cy="7" r="2.6"/><circle cx="13.5" cy="7.6" r="2.2"/><path d="M2 16c.4-2.8 2.4-4.4 5-4.4s4.6 1.6 5 4.4zM12.6 16c-.2-1.6-.8-2.9-1.8-3.8.8-.4 1.7-.6 2.7-.6 2.2 0 3.9 1.4 4.3 4.4z"/></svg>';
+const GROUP_PLACEHOLDERS = ["e.g. Banter", "e.g. Pace", "e.g. Chaos", "e.g. Style", "e.g. Loyalty", "e.g. Dance moves"];
+const fmt1 = v => (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, "");
+const initials = n => esc(String(n || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?");
+
+function draftLink(code) { return location.origin + location.pathname + "#deck-" + code; }
+function draftInviteText(d) { return `${myName || "Your mate"} wants your help making "${d.name}" on StatAttack. Add cards and rate everyone 1–10 together:`; }
+
+async function renderGroupList() {
+  const el = $("groupList"); if (!el || offline || !sb) return;
+  const { data: mem } = await sb.from("draft_members").select("draft_id").eq("user_id", me).eq("active", true);
+  const ids = (mem || []).map(m => m.draft_id);
+  if (!ids.length || !$("groupList")) { if ($("groupList")) $("groupList").innerHTML = ""; return; }
+  const [{ data: drafts }, { data: cards }, { data: members }] = await Promise.all([
+    sb.from("drafts").select("*").in("id", ids).eq("status", "open").order("updated_at", { ascending: false }),
+    sb.from("draft_cards").select("id, draft_id").in("draft_id", ids).eq("removed", false),
+    sb.from("draft_members").select("draft_id, user_id").in("draft_id", ids).eq("active", true)
+  ]);
+  if ((drafts || []).some(d => d.deck_key && !DECKS[d.deck_key]) && !G && !gameId && !E) {
+    try { await loadDecks(); } catch (e) {}
+    if ($("groupList") && (drafts || []).every(d => !d.deck_key || DECKS[d.deck_key])) return home();
+  }
+  const list = $("groupList"); if (!list) return;
+  list.innerHTML = (drafts || []).map(d => {
+    const n = (cards || []).filter(c => c.draft_id === d.id).length, m = (members || []).filter(x => x.draft_id === d.id).length;
+    return `<li><button type="button" class="game-item" data-draft="${d.id}">
+      <span class="avatar deck-dot" style="--h:${d.hue}">${GROUP_ICON}</span>
+      <span class="gi-main"><b>${esc(d.name)}</b><small>Group deck · ${n} card${n === 1 ? "" : "s"} · ${m} ${m === 1 ? "person" : "people"}${d.deck_key ? " · published" : ""}</small></span>
+      <span class="badge go">Rate</span></button></li>`;
+  }).join("");
+  list.querySelectorAll("[data-draft]").forEach(b => b.onclick = () => openDraft(b.dataset.draft));
+}
+
+async function joinDraftCode(code) {
+  const { data, error } = await sb.rpc("join_draft", { p_code: code });
+  if (error) { toast(errMsg(error)); return home(); }
+  openDraft(data, { welcome: true });
+}
+
+/* Setup form: used to start a group deck and, for its creator, to change it */
+function groupFormHTML(f, locked) {
+  return `
+    <div class="panel">
+      <label class="section-title" for="gfName">Deck name</label>
+      <div class="field"><input id="gfName" maxlength="30" value="${esc(f.name)}" placeholder="e.g. The Lads" autocomplete="off"></div>
+      <label class="section-title" for="gfBlurb">Description <small class="opt">optional</small></label>
+      <div class="field"><input id="gfBlurb" maxlength="80" value="${esc(f.blurb)}" placeholder="e.g. Five-a-side legends, rated honestly" autocomplete="off"></div>
+      <span class="section-title" id="gfHueLbl">Colour</span>
+      <div class="swatches" role="radiogroup" aria-labelledby="gfHueLbl">${DECK_HUES.map(c => `<input type="radio" name="gfHue" id="gfh${c.h}" value="${c.h}" ${c.h === f.hue ? "checked" : ""}><label for="gfh${c.h}" style="--h:${c.h}" title="${c.n}"><span class="sr">${c.n}</span></label>`).join("")}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Stats <span class="count">${f.stats.length}/${MAX_STATS}</span></h2></div>
+      <p>What everyone gets rated on, from 1 to 10. Switch on <b>Lower wins</b> for things where less is better, like lateness.</p>
+      ${locked ? `<p class="fine">People have started rating, so stats can be renamed but not added or removed.</p>` : ""}
+      <div class="stat-eds">${f.stats.map((s, i) => `
+        <div class="se gse">
+          <div class="field se-label"><input data-gl="${i}" maxlength="16" value="${esc(s.label)}" placeholder="${GROUP_PLACEHOLDERS[i] || "Stat name"}" aria-label="Stat ${i + 1} name" autocomplete="off"></div>
+          <label class="toggle"><input type="checkbox" data-gw="${i}" ${s.low ? "checked" : ""}><span>Lower wins</span></label>
+          <button type="button" class="icon-btn" data-gx="${i}" aria-label="Remove stat ${i + 1}" ${locked || f.stats.length <= MIN_STATS ? "disabled" : ""}>${CROSS}</button>
+        </div>`).join("")}
+      </div>
+      <button type="button" class="btn ghost small" id="gfAddStat" ${locked || f.stats.length >= MAX_STATS ? "disabled" : ""}>${PLUS}Add stat</button>
+    </div>`;
+}
+function wireGroupForm(f, redraw) {
+  $("gfName").oninput = e => { f.name = e.target.value; };
+  $("gfBlurb").oninput = e => { f.blurb = e.target.value; };
+  app.querySelectorAll('input[name="gfHue"]').forEach(r => r.onchange = () => { f.hue = +r.value; });
+  app.querySelectorAll("[data-gl]").forEach(inp => inp.oninput = () => { f.stats[+inp.dataset.gl].label = inp.value; });
+  app.querySelectorAll("[data-gw]").forEach(inp => inp.onchange = () => { f.stats[+inp.dataset.gw].low = inp.checked; });
+  app.querySelectorAll("[data-gx]").forEach(b => b.onclick = () => { if (f.stats.length > MIN_STATS) { f.stats.splice(+b.dataset.gx, 1); redraw(); } });
+  $("gfAddStat").onclick = () => { if (f.stats.length < MAX_STATS) { f.stats.push({ label: "", low: false }); redraw(`[data-gl="${f.stats.length - 1}"]`); } };
+}
+function groupFormProblem(f) {
+  if (!f.name.trim()) return { msg: "Give the deck a name", sel: "#gfName" };
+  const i = f.stats.findIndex(s => !s.label.trim());
+  if (i >= 0) return { msg: `Stat ${i + 1} needs a name`, sel: `[data-gl="${i}"]` };
+  return null;
+}
+const formStats = f => f.stats.map(s => ({ label: s.label.trim(), unit: "", low: !!s.low }));
+
+function openGroupSetup(existing, locked) {
+  leaveGame();
+  const f = existing
+    ? { name: existing.name, blurb: existing.blurb || "", hue: existing.hue, stats: existing.stats.map(s => ({ label: s.label, low: !!s.low })) }
+    : { name: "", blurb: "", hue: 140, stats: [{ label: "", low: false }, { label: "", low: false }, { label: "", low: false }] };
+  const draw = focusSel => {
+    const y = window.scrollY;
+    app.innerHTML = `
+    <section class="editor view gsetup">
+      <div class="game-top"><button type="button" class="link" id="gfBack">${BACK}${existing ? "Back" : "Home"}</button><span class="deck-label">${existing ? "Group deck settings" : "New group deck"}</span></div>
+      ${existing ? "" : `<div class="ghero"><span class="avatar deck-dot big" style="--h:${f.hue}">${GROUP_ICON}</span><div><h1>Make a deck with friends</h1><p>Set it up, send the link, then everyone adds cards and rates them 1–10. Each card's score is the group's average, and nobody's rating of their own card counts.</p></div></div>`}
+      ${groupFormHTML(f, locked)}
+      <div class="actions"><button type="button" class="btn primary" id="gfSave">${existing ? "Save changes" : "Create and invite friends"}${ARROW}</button></div>
+    </section>`;
+    window.scrollTo(0, y);
+    wireGroupForm(f, draw);
+    if (focusSel) app.querySelector(focusSel)?.focus();
+    $("gfBack").onclick = () => existing ? openDraft(existing.id) : home();
+    $("gfSave").onclick = async () => {
+      const p = groupFormProblem(f);
+      if (p) { toast(p.msg); app.querySelector(p.sel)?.focus(); return; }
+      const b = $("gfSave"); b.disabled = true;
+      const { data, error } = existing
+        ? await sb.rpc("update_draft", { p_draft: existing.id, p_name: f.name.trim(), p_stats: formStats(f), p_hue: f.hue, p_blurb: f.blurb.trim() })
+        : await sb.rpc("create_draft", { p_name: f.name.trim(), p_stats: formStats(f), p_hue: f.hue, p_blurb: f.blurb.trim() });
+      if (error) { b.disabled = false; return toast(errMsg(error)); }
+      toast(existing ? "Saved" : "Group deck created");
+      openDraft(existing ? existing.id : data, { invite: !existing });
+    };
+  };
+  document.title = (existing ? "Group deck settings" : "New group deck") + " · StatAttack";
+  draw();
+}
+
+/* The group deck screen */
+async function openDraft(id, opts = {}) {
+  leaveGame();
+  G = { id, mine: {}, pend: {}, chan: null, form: null, invite: !!opts.invite, welcome: !!opts.welcome };
+  app.innerHTML = `<div class="loading view"><span>Loading group deck…</span></div>`;
+  await loadDraft();
+  if (!G || G.id !== id) return;
+  if (!G.d || G.d.status !== "open") { toast("That group deck isn't available any more"); G = null; return home(); }
+  const ch = (table, filter) => ({ event: "*", schema: "public", table, filter });
+  G.chan = sb.channel("draft-" + id)
+    .on("postgres_changes", ch("draft_cards", `draft_id=eq.${id}`), scheduleDraftReload)
+    .on("postgres_changes", ch("draft_ratings", `draft_id=eq.${id}`), scheduleDraftReload)
+    .on("postgres_changes", ch("draft_members", `draft_id=eq.${id}`), scheduleDraftReload)
+    .on("postgres_changes", ch("drafts", `id=eq.${id}`), scheduleDraftReload)
+    .subscribe();
+  document.title = G.d.name + " · StatAttack";
+  renderDraft();
+}
+async function loadDraft() {
+  const id = G.id;
+  const [d, m, c, r] = await Promise.all([
+    sb.from("drafts").select("*").eq("id", id).maybeSingle(),
+    sb.from("draft_members").select("*").eq("draft_id", id).eq("active", true),
+    sb.from("draft_cards").select("*").eq("draft_id", id).eq("removed", false).order("created_at"),
+    sb.from("draft_ratings").select("*").eq("draft_id", id)
+  ]);
+  if (!G || G.id !== id) return;
+  G.d = d.data || null; G.members = m.data || []; G.cards = c.data || [];
+  G.ratings = (r.data || []).map(x => ({ ...x, vals: x.vals.map(v => v == null ? null : Number(v)) }));
+  // keep ratings you've just made that haven't reached the server yet
+  Object.entries(G.mine).forEach(([cid, vals]) => upsertLocal(cid, vals));
+  await loadNames([...G.members.map(x => x.user_id), ...G.cards.map(x => x.added_by), ...G.cards.map(x => x.subject).filter(Boolean)]);
+}
+function leaveDraft() {
+  if (!G) return;
+  Object.keys(G.pend).forEach(cid => { clearTimeout(G.pend[cid]); saveRating(cid); });
+  if (G.chan) sb.removeChannel(G.chan);
+  clearTimeout(gTimer); G = null;
+}
+const draftSig = () => JSON.stringify([G.d.name, G.d.blurb, G.d.hue, G.d.stats, G.d.deck_key, G.d.status, G.members.map(m => m.user_id), G.cards.map(c => [c.id, c.name, c.image_url, c.subject])]);
+function scheduleDraftReload() {
+  clearTimeout(gTimer);
+  gTimer = setTimeout(async () => {
+    if (!G || !G.d) return;
+    const before = draftSig();
+    await loadDraft();
+    if (!G || !$("rateTrack")) return;
+    if (!G.d || G.d.status !== "open") { toast("This group deck was closed"); G = null; return home(); }
+    if (draftSig() !== before && !(document.activeElement && document.activeElement.matches && document.activeElement.matches("#rateTrack input, #addPanel input"))) renderDraft(true);
+    else patchDraft();
+  }, 250);
+}
+function upsertLocal(cid, vals) {
+  const row = G.ratings.find(r => r.card_id === cid && r.user_id === me);
+  if (row) row.vals = vals.slice(); else G.ratings.push({ card_id: cid, draft_id: G.id, user_id: me, vals: vals.slice() });
+}
+const gStats = () => G.d.stats;
+const isDraftOwner = () => G.d.owner === me;
+const myVals = cid => { const r = G.ratings.find(x => x.card_id === cid && x.user_id === me); return r ? r.vals.slice() : gStats().map(() => null); };
+function cardAvg(c, j) {
+  const rs = G.ratings.filter(r => r.card_id === c.id && r.user_id !== c.subject && r.vals[j] != null);
+  return rs.length ? { avg: rs.reduce((a, r) => a + r.vals[j], 0) / rs.length, n: rs.length } : { avg: null, n: 0 };
+}
+const ratable = () => G.cards.filter(c => c.subject !== me);
+const ratedByMe = c => { const v = myVals(c.id); return v.every(x => x != null); };
+const iHaveCard = () => G.cards.some(c => c.subject === me);
+const canEditCard = c => c.added_by === me || c.subject === me || isDraftOwner();
+function missingRatings() {
+  const out = [];
+  G.cards.forEach(c => { const miss = gStats().filter((s, j) => !cardAvg(c, j).n).map(s => s.label); if (miss.length) out.push({ c, miss }); });
+  return out;
+}
+
+function rateCardHTML(c, i) {
+  const own = c.subject === me, vals = myVals(c.id), n = G.cards.length;
+  const who = c.subject ? (own ? "You" : `${esc(names[c.subject] || "Player")}`) : "";
+  return `
+  <article class="rate-card${own ? " own" : ""}" data-rc="${c.id}" style="--h:${G.d.hue}">
+    <div class="rc-art">${c.image_url ? `<img src="${esc(c.image_url)}" alt="" loading="lazy">` : `<span class="rc-mono">${initials(c.name)}</span>`}
+      <div class="rc-top"><span class="chip">${i + 1} / ${n}</span>${who ? `<span class="chip me-chip">${own ? "This is you" : `This is ${who}`}</span>` : ""}</div>
+      <h3>${esc(c.name)}</h3>
+    </div>
+    <div class="rc-body">
+      ${own ? `<p class="rc-own">This card is you, so you can't rate it. Your mates decide.</p>` : ""}
+      ${gStats().map((s, j) => { const a = cardAvg(c, j), v = vals[j];
+        return `<div class="rrow">
+          <div class="rlbl"><span>${esc(s.label)}${s.low ? ` <em class="low" title="Lower wins">low wins</em>` : ""}</span><span class="ravg" data-avg="${c.id}|${j}">${avgText(a)}</span></div>
+          ${own ? `<div class="rbarx"><i data-bar="${c.id}|${j}" style="width:${a.avg == null ? 0 : a.avg * 10}%"></i></div>` :
+          `<div class="rslide"><input type="range" min="1" max="10" step="1" value="${v ?? 5}" data-r="${c.id}" data-j="${j}" class="${v == null ? "unset" : ""}" style="--p:${((v ?? 5) - 1) / 9 * 100}%" aria-label="Your ${esc(s.label)} rating for ${esc(c.name)}, 1 to 10"><output data-o="${c.id}|${j}">${v ?? "–"}</output></div>`}
+        </div>`; }).join("")}
+    </div>
+    <div class="rc-foot">
+      <span class="rc-by">Added by ${c.added_by === me ? "you" : esc(names[c.added_by] || "Player")}</span>
+      <span class="rc-acts">
+        ${!c.subject && !iHaveCard() ? `<button type="button" class="link small-link" data-claim="${c.id}">This is me</button>` : ""}
+        ${own ? `<button type="button" class="link small-link" data-unclaim="${c.id}">Not me</button>` : ""}
+        ${canEditCard(c) ? `<button type="button" class="link small-link" data-cedit="${c.id}">Edit</button><button type="button" class="link small-link danger" data-cdel="${c.id}">Remove</button>` : ""}
+      </span>
+    </div>
+  </article>`;
+}
+const avgText = a => a.n ? `<b>${fmt1(a.avg)}</b> avg · ${a.n} rating${a.n === 1 ? "" : "s"}` : `No ratings yet`;
+
+function progressHTML() {
+  const mineToDo = ratable(), done = mineToDo.filter(ratedByMe).length, n = G.cards.length;
+  const pct = mineToDo.length ? done / mineToDo.length * 100 : 0;
+  const msg = !n ? "No cards yet. Add your mates, one card each." : !mineToDo.length ? "Nothing for you to rate yet." : done === mineToDo.length ? `You've rated all ${done}. Nice.` : `You've rated ${done} of ${mineToDo.length}`;
+  return `<div class="gprog-row"><span>${msg}</span><span class="count">${n} card${n === 1 ? "" : "s"}${n < MIN_CARDS ? ` · ${MIN_CARDS - n} more to play` : ""}</span></div><div class="gbar" aria-hidden="true"><i style="width:${pct}%"></i></div>`;
+}
+function publishHTML() {
+  const d = G.d, n = G.cards.length, miss = missingRatings(), okCards = n >= MIN_CARDS && n <= MAX_CARDS, ready = okCards && !miss.length;
+  const published = !!d.deck_key, owner = isDraftOwner();
+  const checks = `<ul class="checks">
+      <li class="${okCards ? "ok" : ""}">${okCards ? "✓" : "•"} ${n} of at least ${MIN_CARDS} cards</li>
+      <li class="${miss.length ? "" : "ok"}">${miss.length ? "•" : "✓"} ${miss.length ? `${miss.length} card${miss.length === 1 ? " needs" : "s need"} ratings: ${miss.slice(0, 3).map(x => `<b>${esc(x.c.name)}</b> (${x.miss.map(esc).join(", ")})`).join(", ")}${miss.length > 3 ? "…" : ""}` : "Every card has ratings for every stat"}</li>
+    </ul>`;
+  if (!owner) return `<h2>${published ? "Ready to play" : "Publishing"}</h2>
+    <p>${published ? "This deck is published. Ratings can keep changing; " + esc(names[d.owner] || "the creator") + " can publish again to update the scores." : `${esc(names[d.owner] || "Whoever started it")} publishes the deck once everyone's rated.`}</p>
+    ${published ? "" : checks}
+    ${published ? `<div class="actions"><button type="button" class="btn primary" id="gPlay">Start a game with it${ARROW}</button></div>` : ""}`;
+  return `<h2>${published ? "Update the deck" : "Publish"}</h2>
+    <p>Each card gets the group's average rating. ${published ? "Ratings can keep changing. Publish again to update the scores; games already running keep the old ones." : "After that, everyone in the group can play it."}</p>
+    ${checks}
+    <div class="actions"><button type="button" class="btn ${published ? "ghost" : "primary"}" id="gPublish" ${ready ? "" : "disabled"}>${published ? "Publish update" : "Publish deck"}${ARROW}</button>${published ? `<button type="button" class="btn primary" id="gPlay">Start a game with it${ARROW}</button>` : ""}</div>`;
+}
+function addPanelHTML() {
+  const f = G.form; if (!f) return "";
+  return `
+    <div class="panel addcard" id="addPanel">
+      <div class="panel-head"><h2>${f.edit ? "Edit card" : "Add a card"}</h2><button type="button" class="link" id="acClose">Close</button></div>
+      <div class="ac-row">
+        <button type="button" class="ce-photo${f.image ? " has" : ""}${f.busy ? " busy" : ""}" id="acPhoto" style="--h:${G.d.hue}" aria-label="${f.image ? "Change" : "Add"} photo">${f.busy ? "<span>Uploading…</span>" : f.image ? `<img src="${esc(f.image)}" alt="">` : `${CAMERA}<span>Photo</span>`}</button>
+        <div class="ac-main">
+          <label class="section-title" for="acName">Name</label>
+          <div class="field"><input id="acName" maxlength="24" value="${esc(f.name)}" placeholder="Who or what is it?" autocomplete="off"></div>
+          ${!f.edit && !iHaveCard() ? `<label class="toggle"><input type="checkbox" id="acMe" ${f.isMe ? "checked" : ""}><span>This card is me</span></label>` : ""}
+        </div>
+      </div>
+      <div class="actions"><button type="button" class="btn primary" id="acSave">${f.edit ? "Save card" : "Add card"}${ARROW}</button></div>
+      <input type="file" id="acFile" accept="image/*" hidden>
+    </div>`;
+}
+
+function renderDraft(keep) {
+  if (!G || !G.d) return;
+  const d = G.d, owner = isDraftOwner(), link = draftLink(d.code);
+  const track = $("rateTrack"), sx = track ? track.scrollLeft : 0, y = window.scrollY;
+  const shown = G.members.slice(0, 8);
+  app.innerHTML = `
+  <section class="group view">
+    <div class="game-top"><button type="button" class="link" id="gBack">${BACK}Home</button><span class="deck-label">Group deck${d.deck_key ? " · published" : ""}</span></div>
+    ${G.welcome ? `<div class="notebar"><span>You're in. Add cards for anyone missing, then rate everyone.</span><button type="button" class="link" id="gWelcomeX">Got it</button></div>` : ""}
+    <div class="panel ghead">
+      <div class="ghead-top"><span class="avatar deck-dot big" style="--h:${d.hue}">${GROUP_ICON}</span>
+        <div class="ghead-txt"><h2>${esc(d.name)}</h2><p>${d.blurb ? esc(d.blurb) : "Rate every card 1–10. The group's average becomes its score."}</p></div>
+        ${owner ? `<button type="button" class="btn ghost small" id="gSettings">Settings</button>` : ""}</div>
+      <div class="gmembers"><span class="stack">${shown.map(m => `<span class="avatar${m.user_id === me ? "" : " them"} sm" title="${esc(m.user_id === me ? "You" : names[m.user_id] || "Player")}" style="--them:${seatColor(G.members.indexOf(m))}">${m.user_id === me ? ME : initial(names[m.user_id])}</span>`).join("")}</span>
+        <span class="gm-txt">${G.members.length === 1 ? "Just you so far" : `${G.members.length} people in`}</span>
+        <button type="button" class="btn ${G.members.length === 1 ? "primary" : "ghost"} small" id="gInvite">Invite</button></div>
+      <div class="ginvite" id="gInviteBox" ${G.invite ? "" : "hidden"}>
+        <p>Send this link to the group. Anyone with it can add cards and rate.</p>
+        <span class="link" id="gLink">${esc(link)}</span>
+        <div class="actions"><button type="button" class="btn primary small" id="gShare">${navigator.share ? "Share link" : "Copy link"}${ARROW}</button><a class="btn ghost small" href="https://wa.me/?text=${encodeURIComponent(draftInviteText(d) + " " + link)}" target="_blank" rel="noopener">WhatsApp</a></div>
+      </div>
+    </div>
+    <div class="gprog" id="gProg">${progressHTML()}</div>
+    <div id="addSlot">${addPanelHTML()}</div>
+    <div class="rate-wrap">
+      <div class="rate-track" id="rateTrack">
+        ${G.cards.map(rateCardHTML).join("")}
+        <button type="button" class="rate-card add-tile" id="gAddTile">${PLUS}<b>Add a card</b><span>${G.cards.length ? "Someone missing?" : "Start with the people in the group"}</span></button>
+      </div>
+      <div class="rate-nav"><button type="button" class="icon-btn" id="rPrev" aria-label="Previous card">${BACK}</button><span id="rPos"></span><button type="button" class="icon-btn" id="rNext" aria-label="Next card">${ARROW}</button></div>
+    </div>
+    <div class="panel" id="pubPanel">${publishHTML()}</div>
+    <div class="gfoot">${owner ? `<button type="button" class="link danger" id="gClose">Close this group deck</button>` : `<button type="button" class="link danger" id="gLeave">Leave this group deck</button>`}</div>
+  </section>`;
+  wireDraft();
+  if (keep) { $("rateTrack").scrollLeft = sx; window.scrollTo(0, y); }
+  updatePos();
+}
+function patchDraft() {
+  if (!G || !$("rateTrack")) return;
+  G.cards.forEach(c => gStats().forEach((s, j) => {
+    const a = cardAvg(c, j);
+    const el = app.querySelector(`[data-avg="${c.id}|${j}"]`); if (el) el.innerHTML = avgText(a);
+    const bar = app.querySelector(`[data-bar="${c.id}|${j}"]`); if (bar) bar.style.width = (a.avg == null ? 0 : a.avg * 10) + "%";
+  }));
+  $("gProg").innerHTML = progressHTML();
+  $("pubPanel").innerHTML = publishHTML(); wirePublish();
+}
+function updatePos() {
+  const t = $("rateTrack"); if (!t) return;
+  const cards = [...t.children], w = cards[0] ? cards[0].getBoundingClientRect().width + 12 : 1;
+  const i = Math.min(cards.length - 1, Math.round(t.scrollLeft / w));
+  const n = G.cards.length;
+  $("rPos").textContent = n ? (i < n ? `${i + 1} of ${n}` : "Add a card") : "";
+  $("rPrev").disabled = i <= 0; $("rNext").disabled = i >= cards.length - 1;
+}
+function scrollToCard(i) {
+  const t = $("rateTrack"); if (!t || !t.children[i]) return;
+  t.scrollTo({ left: t.children[i].offsetLeft - t.offsetLeft, behavior: reduceMotion ? "auto" : "smooth" });
+}
+
+function wireDraft() {
+  const d = G.d;
+  $("gBack").onclick = () => home();
+  if ($("gWelcomeX")) $("gWelcomeX").onclick = () => { G.welcome = false; $("gWelcomeX").closest(".notebar").remove(); };
+  if ($("gSettings")) $("gSettings").onclick = () => openGroupSetup({ ...d }, G.ratings.length > 0);
+  $("gInvite").onclick = () => { G.invite = !G.invite; $("gInviteBox").hidden = !G.invite; };
+  $("gShare").onclick = async () => {
+    const link = draftLink(d.code), text = draftInviteText(d);
+    if (navigator.share) { try { await navigator.share({ title: d.name, text, url: link }); } catch (e) {} return; }
+    try { await navigator.clipboard.writeText(link); toast("Link copied"); } catch (e) { toast("Copy the link above"); }
+  };
+  const t = $("rateTrack");
+  t.addEventListener("scroll", () => requestAnimationFrame(updatePos), { passive: true });
+  const step = dir => { const w = t.children[0].getBoundingClientRect().width + 12; t.scrollBy({ left: dir * w, behavior: reduceMotion ? "auto" : "smooth" }); };
+  $("rPrev").onclick = () => step(-1); $("rNext").onclick = () => step(1);
+  $("gAddTile").onclick = () => openCardForm(null);
+  t.querySelectorAll("input[type=range]").forEach(inp => {
+    const go = () => onSlide(inp);
+    inp.addEventListener("input", go); inp.addEventListener("change", go);
+    // a tap on an unset slider counts as choosing that value
+    inp.addEventListener("pointerup", () => { if (inp.classList.contains("unset")) go(); });
+  });
+  t.querySelectorAll("[data-claim]").forEach(b => b.onclick = () => claimCard(b.dataset.claim, true));
+  t.querySelectorAll("[data-unclaim]").forEach(b => b.onclick = () => claimCard(b.dataset.unclaim, false));
+  t.querySelectorAll("[data-cedit]").forEach(b => b.onclick = () => openCardForm(G.cards.find(c => c.id === b.dataset.cedit)));
+  t.querySelectorAll("[data-cdel]").forEach(b => b.onclick = async () => {
+    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Sure?"; setTimeout(() => { if (b.isConnected) { b.classList.remove("sure"); b.textContent = "Remove"; } }, 3000); return; }
+    const { error } = await sb.rpc("remove_draft_card", { p_card: b.dataset.cdel });
+    if (error) return toast(errMsg(error));
+    toast("Card removed"); await loadDraft(); renderDraft(true);
+  });
+  wireCardForm();
+  wirePublish();
+  const close = $("gClose"), leave = $("gLeave");
+  if (close) close.onclick = () => groupConfirm(close, "Close this group deck? Nobody can rate or add cards any more. A published deck stays playable.", "Close it", async () => {
+    const { error } = await sb.rpc("close_draft", { p_draft: G.id }); if (error) return toast(errMsg(error)); toast("Group deck closed"); home();
+  });
+  if (leave) leave.onclick = () => groupConfirm(leave, "Leave this group deck? You can rejoin with the link.", "Leave", async () => {
+    const { error } = await sb.rpc("leave_draft", { p_draft: G.id }); if (error) return toast(errMsg(error)); toast("You left the group deck"); home();
+  });
+}
+function groupConfirm(anchor, text, yes, fn) {
+  document.querySelectorAll(".confirm").forEach(c => c.remove());
+  const bar = document.createElement("div"); bar.className = "confirm"; bar.setAttribute("role", "alertdialog");
+  bar.innerHTML = `<span>${text}</span><span class="actions"><button type="button" class="btn ghost small" data-no>Cancel</button><button type="button" class="btn danger small" data-yes>${yes}</button></span>`;
+  anchor.closest(".gfoot").insertAdjacentElement("beforebegin", bar);
+  bar.querySelector("[data-no]").onclick = () => bar.remove();
+  bar.querySelector("[data-yes]").onclick = async () => { bar.querySelectorAll("button").forEach(x => x.disabled = true); await fn(); bar.remove(); };
+}
+function wirePublish() {
+  const pub = $("gPublish"), play = $("gPlay");
+  if (pub) pub.onclick = async () => {
+    pub.disabled = true;
+    const { data, error } = await sb.rpc("publish_draft", { p_draft: G.id });
+    if (error) { pub.disabled = false; return toast(errMsg(error)); }
+    try { await loadDecks(); } catch (e) {}
+    toast(G.d.deck_key ? "Deck updated" : "Published. Everyone in the group can play it now");
+    await loadDraft(); renderDraft(true);
+    $("pubPanel")?.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+  };
+  if (play) play.onclick = async () => {
+    play.disabled = true;
+    try { if (!DECKS[G.d.deck_key]) await loadDecks(); } catch (e) {}
+    const n = Math.max(2, Math.min(6, G.members.length));
+    const { data, error } = n > 2
+      ? await sb.rpc("new_game", { p_deck: G.d.deck_key, p_timer: timerSecs, p_players: n })
+      : await sb.rpc("create_game", { p_deck: G.d.deck_key, p_timer: timerSecs });
+    if (error) { play.disabled = false; return toast(errMsg(error)); }
+    openGame(data.game.id);
+  };
+}
+
+function onSlide(inp) {
+  const cid = inp.dataset.r, j = +inp.dataset.j, v = +inp.value;
+  const vals = (G.mine[cid] || myVals(cid)).slice(); vals[j] = v;
+  G.mine[cid] = vals; upsertLocal(cid, vals);
+  inp.classList.remove("unset"); inp.style.setProperty("--p", (v - 1) / 9 * 100 + "%");
+  const o = app.querySelector(`[data-o="${cid}|${j}"]`); if (o) o.textContent = v;
+  const c = G.cards.find(x => x.id === cid);
+  const el = app.querySelector(`[data-avg="${cid}|${j}"]`); if (el && c) el.innerHTML = avgText(cardAvg(c, j));
+  $("gProg").innerHTML = progressHTML();
+  clearTimeout(G.pend[cid]); G.pend[cid] = setTimeout(() => saveRating(cid), 450);
+}
+async function saveRating(cid) {
+  const g = G; if (!g) return;
+  const vals = g.mine[cid]; delete g.pend[cid];
+  if (!vals) return;
+  const { error } = await sb.rpc("rate_draft_card", { p_card: cid, p_vals: vals });
+  if (error) { toast(errMsg(error)); return; }
+  if (g.mine[cid] === vals) delete g.mine[cid];
+  if (G === g && $("pubPanel")) { $("pubPanel").innerHTML = publishHTML(); wirePublish(); }
+}
+async function claimCard(cid, on) {
+  const { error } = await sb.rpc("claim_draft_card", { p_card: cid, p_claim: on });
+  if (error) return toast(errMsg(error));
+  toast(on ? "Marked as you. Your ratings on it won't count." : "Unmarked");
+  await loadDraft(); renderDraft(true);
+}
+
+function openCardForm(c) {
+  G.form = c ? { edit: c.id, name: c.name, image: c.image_url, keep: true } : { name: "", image: null, isMe: false };
+  $("addSlot").innerHTML = addPanelHTML(); wireCardForm();
+  $("addPanel").scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+  $("acName").focus({ preventScroll: true });
+}
+function wireCardForm() {
+  if (!$("addPanel")) return;
+  const f = G.form;
+  $("acClose").onclick = () => { G.form = null; $("addSlot").innerHTML = ""; };
+  $("acName").oninput = e => { f.name = e.target.value; };
+  $("acName").onkeydown = e => { if (e.key === "Enter") $("acSave").click(); };
+  if ($("acMe")) $("acMe").onchange = e => { f.isMe = e.target.checked; };
+  $("acPhoto").onclick = () => { if (f.busy) return; $("acFile").value = ""; $("acFile").click(); };
+  $("acFile").onchange = async e => {
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    f.busy = true; $("addSlot").innerHTML = addPanelHTML(); wireCardForm();
+    try { f.image = await uploadPhoto(file); f.keep = false; } catch (err) { toast(err.message || "That photo couldn't be uploaded. Try another."); }
+    f.busy = false; if (G && G.form === f) { $("addSlot").innerHTML = addPanelHTML(); wireCardForm(); }
+  };
+  $("acSave").onclick = async () => {
+    if (!f.name.trim()) { toast("Give the card a name"); return $("acName").focus(); }
+    if (f.busy) return toast("Wait for the photo to finish uploading");
+    const b = $("acSave"); b.disabled = true;
+    const { data, error } = f.edit
+      ? await sb.rpc("update_draft_card", { p_card: f.edit, p_name: f.name.trim(), p_image: f.image, p_keep_image: !!f.keep })
+      : await sb.rpc("add_draft_card", { p_draft: G.id, p_name: f.name.trim(), p_image: f.image, p_is_me: !!f.isMe });
+    if (error) { b.disabled = false; return toast(errMsg(error)); }
+    const edited = f.edit;
+    toast(edited ? "Card saved" : `${f.name.trim()} added`);
+    // keep the form open for the next card when adding
+    G.form = edited ? null : { name: "", image: null, isMe: false };
+    await loadDraft(); if (!G) return;
+    renderDraft(true);
+    const idx = G.cards.findIndex(c => c.id === (edited || data));
+    if (idx >= 0) scrollToCard(idx);
+    if (!edited) $("acName")?.focus({ preventScroll: true });
+  };
+}
+
 /* ---------- Boot ---------- */
 async function boot() {
   app.innerHTML = `<div class="loading view"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><span>Connecting…</span></div>`;
@@ -1212,6 +1774,11 @@ async function boot() {
   if (!myName && !isGuest && session.user.user_metadata && session.user.user_metadata.full_name) await saveName(String(session.user.user_metadata.full_name).split(" ")[0]);
   if (openId && /^[0-9a-f-]{36}$/i.test(openId)) return openGame(openId);
   const code = (location.hash || "").slice(1).toUpperCase();
+  if (/^DECK-[A-Z0-9]{6}$/.test(code)) {
+    history.replaceState(null, "", location.pathname + location.search);
+    if (myName) return joinDraftCode(code.slice(5));
+    return home(code);
+  }
   if (/^[A-Z0-9]{6}$/.test(code)) {
     history.replaceState(null, "", location.pathname + location.search);
     if (myName) return joinGame(code);
@@ -1228,6 +1795,7 @@ function goOffline(html) {
 /* ---------- Home ---------- */
 async function home(pendingCode) {
   leaveGame();
+  const deckInvite = /^DECK-/.test(pendingCode || "");
   document.title = "StatAttack";
   if (offline) {
     app.innerHTML = `
@@ -1244,18 +1812,18 @@ async function home(pendingCode) {
   const deckTiles = playableDecks().map(d => `
     <button type="button" class="tile" data-deck="${d.key}">
       ${(() => { const sample = card(d, d.key === "cars" ? 12 : 0), pic = d.custom && !sample.image ? "" : artFor(d, sample); return `<span class="art${pic ? " has-illus" : ""}" style="--h:${hueOf(d, sample.id)}">${pic}<span class="num" aria-hidden="true">${d.cards.length}</span></span>`; })()}
-      <span class="tile-body"><b>${esc(d.name)}${d.custom ? ` <em class="mine">Your deck</em>` : ""}</b><span>${esc(d.blurb || "")}</span><span class="stat-list">${d.cards.length} cards · ${d.stats.map(s => esc(s.label)).join(", ")}</span></span>
+      <span class="tile-body"><b>${esc(d.name)}${d.custom ? ` <em class="mine">${d.group ? "Group deck" : "Your deck"}</em>` : ""}</b><span>${esc(d.blurb || "")}</span><span class="stat-list">${d.cards.length} cards · ${d.stats.map(s => esc(s.label)).join(", ")}</span></span>
       <span class="go" aria-hidden="true">${ARROW}</span>
     </button>`).join("");
   app.innerHTML = `
   <section class="home view">
     <div class="greeting"><h1>${myName ? `Hi ${esc(myName)}. <span>Who are you taking on?</span>` : `Pick a stat. Beat your mate. <span>Take the card.</span>`}</h1></div>
     <div id="installSlot">${installHTML()}</div>
-    ${pendingCode ? `<div class="panel"><h2>You've been invited</h2><p>Add your name so your friend knows who they're playing, then join game <b>${esc(pendingCode)}</b>.</p></div>` : ""}
+    ${pendingCode ? `<div class="panel"><h2>You've been invited</h2><p>${deckInvite ? "Add your name so everyone knows who's rating, then join the group deck." : `Add your name so your friend knows who they're playing, then join game <b>${esc(pendingCode)}</b>.`}</p></div>` : ""}
     <div class="panel">
       <label class="section-title" for="name">Your name</label>
       <div class="row-form"><div class="field"><span class="avatar" id="nameAv">${ME}</span><input id="name" maxlength="20" autocomplete="nickname" value="${esc(myName)}" placeholder="What your friends call you"></div>
-      ${pendingCode ? `<button type="button" class="btn primary small" id="joinPending">Join game${ARROW}</button>` : `<button type="button" class="btn ghost small" id="saveName">Save</button>`}</div>
+      ${pendingCode ? `<button type="button" class="btn primary small" id="joinPending">${deckInvite ? "Join" : "Join game"}${ARROW}</button>` : `<button type="button" class="btn ghost small" id="saveName">Save</button>`}</div>
     </div>
     ${pendingCode ? "" : `
     <div class="panel">
@@ -1290,7 +1858,7 @@ async function home(pendingCode) {
   wireMyDecks();
   wireInstall();
   if ($("acct")) wireAccount();
-  if (pendingCode) { $("joinPending").onclick = async () => { if (await needName()) joinGame(pendingCode); }; return; }
+  if (pendingCode) { $("joinPending").onclick = async () => { if (await needName()) deckInvite ? joinDraftCode(pendingCode.slice(5)) : joinGame(pendingCode); }; return; }
   $("saveName").onclick = async () => { if (await needName()) toast("Name saved"); };
   app.querySelectorAll("[data-deck]").forEach(b => b.onclick = async () => {
     if (busy || !(await needName())) return;
@@ -1377,25 +1945,28 @@ const CROSS = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="
 const MIN_CARDS = 8, MAX_CARDS = 30, MIN_STATS = 2, MAX_STATS = 6;
 let E = null, draftTimer = 0;
 
-const playableDecks = () => Object.values(DECKS).filter(d => !d.archived && (!d.owner || d.owner === me));
-const myDecks = () => Object.values(DECKS).filter(d => d.owner && d.owner === me && !d.archived);
+const playableDecks = () => Object.values(DECKS).filter(d => !d.archived && (!d.owner || d.owner === me || d.group));
+const myDecks = () => Object.values(DECKS).filter(d => d.owner && d.owner === me && !d.archived && !d.group);
 
 function myDecksPanel() {
   const mine = myDecks();
   return `
     <div class="panel" id="myDecks">
-      <div class="panel-head"><h2>Your decks</h2><button type="button" class="btn primary small" id="newDeck">${PLUS}Create a deck</button></div>
+      <div class="panel-head"><h2>Your decks</h2><span class="head-btns"><button type="button" class="btn ghost small" id="newGroup">${GROUP_ICON}With friends</button><button type="button" class="btn primary small" id="newDeck">${PLUS}Create a deck</button></span></div>
+      <ul class="games-list" id="groupList"></ul>
       ${mine.length ? `<ul class="games-list">${mine.map(d => `
         <li class="gi-row"><button type="button" class="game-item" data-edit="${d.key}">
           <span class="avatar deck-dot" style="--h:${d.hues[0]}">${esc((d.name.trim()[0] || "?").toUpperCase())}</span>
           <span class="gi-main"><b>${esc(d.name)}</b><small>${d.cards.length} cards · ${d.stats.map(s => esc(s.label)).join(", ")}</small></span>
           <span class="badge">Edit</span></button>
           <button type="button" class="gi-x" data-remove="${d.key}" aria-label="Remove ${esc(d.name)}">Remove</button></li>`).join("")}</ul>`
-      : `<p>Make a deck about anything: your mates, your local pubs, the family dog. Anyone you play with it can use it too.</p>`}
+      : `<p>Make a deck about anything: your mates, your local pubs, the family dog. Or make one <b>with friends</b>: everyone adds cards and rates them together.</p>`}
     </div>`;
 }
 function wireMyDecks() {
   const nb = $("newDeck"); if (nb) nb.onclick = () => openEditor(null);
+  const ng = $("newGroup"); if (ng) ng.onclick = () => openGroupSetup(null);
+  renderGroupList();
   app.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => openEditor(b.dataset.edit));
   app.querySelectorAll("[data-remove]").forEach(b => b.onclick = async () => {
     if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Sure?"; setTimeout(() => { b.classList.remove("sure"); b.textContent = "Remove"; }, 3000); return; }
@@ -1699,6 +2270,7 @@ async function saveDeck() {
 /* ---------- Game ---------- */
 function leaveGame() {
   if (typeof stopPractice === "function" && P) stopPractice();
+  if (typeof leaveDraft === "function") leaveDraft();
   if (typeof E !== "undefined" && E) { clearTimeout(draftTimer); persistDraft(); E = null; }
   if (gameChan) { sb.removeChannel(gameChan); gameChan = null; }
   if (homeChan) { sb.removeChannel(homeChan); homeChan = null; }
@@ -2172,7 +2744,9 @@ function clock() {
 // An invite link opened in a tab that already has StatAttack open only changes the #code
 window.addEventListener("hashchange", () => {
   const code = (location.hash || "").slice(1).toUpperCase();
-  if (!/^[A-Z0-9]{6}$/.test(code) || !sb || offline) return;
+  if (!sb || offline) return;
+  if (/^DECK-[A-Z0-9]{6}$/.test(code)) { history.replaceState(null, "", location.pathname + location.search); return myName ? joinDraftCode(code.slice(5)) : home(code); }
+  if (!/^[A-Z0-9]{6}$/.test(code)) return;
   history.replaceState(null, "", location.pathname + location.search);
   if (myName) joinGame(code); else home(code);
 });
