@@ -864,6 +864,10 @@ img.gplace { transition: opacity .3s; }
 .add-big.hero small { color: rgba(255, 255, 255, .85); }
 .add-big.wide { width: 100%; }
 @media (max-width: 640px) { .add-opts, .add-opts.two { grid-template-columns: minmax(0, 1fr); gap: 8px; } .add-big { padding: 12px; } }
+
+.head-right { display: inline-flex; align-items: baseline; gap: 12px; }
+.link.sure { color: #fff !important; background: var(--lose); padding: 3px 10px; border-radius: 999px; text-decoration: none !important; }
+.gclear { display: flex; justify-content: flex-end; margin-top: -6px; }
 </style>
 </head>
 <body>
@@ -1868,13 +1872,14 @@ function renderDraft(keep) {
       </div>
     </div>
     <div class="gprog" id="gProg">${progressHTML()}</div>
+    ${G.cards.length && (owner || G.cards.some(c => c.added_by === me)) ? `<div class="gclear"><button type="button" class="link small-link danger" id="gClear">${owner ? `Remove all ${G.cards.length} cards` : "Remove the cards I added"}</button></div>` : ""}
     <div class="add-opts">
       <button type="button" class="add-big hero" id="gMapBtn"><span class="ab-ic">${MAP_PIN}</span><span class="ab-t"><b>From the map</b><small>Pubs, cafés, gyms and more, with photos</small></span></button>
       <button type="button" class="add-big" id="gPhotoBtn"><span class="ab-ic">${CAMERA}</span><span class="ab-t"><b>From a group photo</b><small>One card per face</small></span></button>
       <button type="button" class="add-big" id="gAddBtn"><span class="ab-ic">${PLUS}</span><span class="ab-t"><b>One at a time</b><small>A name and a photo</small></span></button>
     </div>
     <div id="placesSlot">${PS && PS.target.kind === "group" ? placesHTML(PS.target.slots()) : ""}</div>
-    <div id="addSlot">${G.split ? splitHTML() : addPanelHTML()}</div>
+    <div id="addSlot">${SP && SP.target.kind === "group" ? splitHTML() : addPanelHTML()}</div>
     <div class="rate-wrap">
       <div class="rate-track" id="rateTrack">
         ${G.cards.map(rateCardHTML).join("")}
@@ -1934,9 +1939,9 @@ function wireDraft() {
   $("gAddTile").onclick = () => openCardForm(null);
   $("gPhotoTile").onclick = $("gPhotoBtn").onclick = () => { $("spFile").value = ""; $("spFile").click(); };
   $("gAddBtn").onclick = () => openCardForm(null);
-  $("gMapBtn").onclick = () => { G.form = null; G.split = null; $("addSlot").innerHTML = ""; openPlaces(groupPlacesTarget()); };
+  $("gMapBtn").onclick = () => { G.form = null; SP = null; $("addSlot").innerHTML = ""; openPlaces(groupPlacesTarget()); };
   if (PS && PS.target.kind === "group") wirePlaces();
-  $("spFile").onchange = e => { const f = e.target.files && e.target.files[0]; if (f) { startSplit(f); $("addSlot").scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" }); } };
+  $("spFile").onchange = e => { const f = e.target.files && e.target.files[0]; if (f) { startSplit(f, groupSplitTarget()); $("addSlot").scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" }); } };
   t.querySelectorAll("input[type=range]").forEach(inp => {
     const go = () => onSlide(inp);
     inp.addEventListener("input", go); inp.addEventListener("change", go);
@@ -1952,8 +1957,14 @@ function wireDraft() {
     if (error) return toast(errMsg(error));
     toast("Card removed"); await loadDraft(); renderDraft(true);
   });
-  if (G.split) wireSplit(); else wireCardForm();
+  if (SP && SP.target.kind === "group") wireSplit(); else wireCardForm();
   wirePublish();
+  const gc = $("gClear");
+  if (gc) gc.onclick = () => groupConfirm(gc, isDraftOwner() ? "Remove every card from this group deck? Everyone's ratings on them go too." : "Remove all the cards you added?", "Remove", async () => {
+    const { data, error } = await sb.rpc("clear_draft_cards", { p_draft: G.id });
+    if (error) return toast(errMsg(error));
+    toast(`${data} card${data === 1 ? "" : "s"} removed`); await loadDraft(); if (G) renderDraft(true);
+  });
   const close = $("gClose"), leave = $("gLeave");
   if (close) close.onclick = () => groupConfirm(close, "Close this group deck? Nobody can rate or add cards any more. A published deck stays playable.", "Close it", async () => {
     const { error } = await sb.rpc("close_draft", { p_draft: G.id }); if (error) return toast(errMsg(error)); toast("Group deck closed"); home();
@@ -1966,7 +1977,7 @@ function groupConfirm(anchor, text, yes, fn) {
   document.querySelectorAll(".confirm").forEach(c => c.remove());
   const bar = document.createElement("div"); bar.className = "confirm"; bar.setAttribute("role", "alertdialog");
   bar.innerHTML = `<span>${text}</span><span class="actions"><button type="button" class="btn ghost small" data-no>Cancel</button><button type="button" class="btn danger small" data-yes>${yes}</button></span>`;
-  anchor.closest(".gfoot").insertAdjacentElement("beforebegin", bar);
+  (anchor.closest(".gfoot, .gclear") || anchor).insertAdjacentElement(anchor.closest(".gclear") ? "afterend" : "beforebegin", bar);
   bar.querySelector("[data-no]").onclick = () => bar.remove();
   bar.querySelector("[data-yes]").onclick = async () => { bar.querySelectorAll("button").forEach(x => x.disabled = true); await fn(); bar.remove(); };
 }
@@ -2022,7 +2033,7 @@ async function claimCard(cid, on) {
 }
 
 function openCardForm(c) {
-  G.split = null;
+  SP = null; PS = null; if ($("placesSlot")) $("placesSlot").innerHTML = "";
   G.form = c ? { edit: c.id, name: c.name, image: c.image_url, keep: true } : { name: "", image: null, isMe: false };
   $("addSlot").innerHTML = addPanelHTML(); wireCardForm();
   $("addPanel").scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
@@ -2151,19 +2162,31 @@ async function uploadBlob(blob) {
   return sb.storage.from("card-images").getPublicUrl(path).data.publicUrl;
 }
 
-async function startSplit(file) {
-  if (!G) return;
-  G.form = null;
-  const sp = G.split = { faces: [], status: "Reading the photo…", busy: true, me: -1 };
+let SP = null;
+const nonBlankCard = c => c.name.trim() || c.image || c.place || c.vals.some(v => String(v).trim());
+const groupSplitTarget = () => ({ kind: "group",
+  slots: () => G ? MAX_CARDS - G.cards.length : 0, canMe: () => !iHaveCard(),
+  mount: html => { const el = $("addSlot"); if (!el) return; el.innerHTML = html || addPanelHTML(); if (!html) wireCardForm(); },
+  addOne: async (name, url, isMe) => { const { error } = await sb.rpc("add_draft_card", { p_draft: G.id, p_name: name, p_image: url, p_is_me: isMe }); if (error) throw new Error(errMsg(error)); },
+  finish: async done => { if (done) notifyGroup(G.id, "cards"); await loadDraft(); if (!G) return; renderDraft(true); if (done) scrollToCard(Math.max(0, G.cards.length - done)); } });
+const editorSplitTarget = () => ({ kind: "editor",
+  slots: () => E ? MAX_CARDS - E.cards.filter(nonBlankCard).length : 0, canMe: () => false,
+  mount: html => { const el = $("splitSlot"); if (el) el.innerHTML = html; },
+  addOne: async (name, url) => { E.cards = E.cards.filter(nonBlankCard); E.cards.push({ name, vals: E.stats.map(() => ""), image: url, place: null }); saveDraft(); },
+  finish: async done => { if (!E) return; E.sel = Math.max(0, E.cards.length - done); rerender("#cardsPanel", done ? `[data-cv="${E.sel}-0"]` : null); } });
+async function startSplit(file, target) {
+  if (G) G.form = null;
+  PS = null; if ($("placesSlot")) $("placesSlot").innerHTML = "";
+  const sp = SP = { faces: [], status: "Reading the photo…", busy: true, me: -1, target };
   drawSplit();
   try { sp.img = await loadPhotoCanvas(file, 2400); }
-  catch (e) { toast(e.message); G.split = null; return drawSplit(); }
+  catch (e) { toast(e.message); SP = null; return target.mount(""); }
   sp.view = cropCanvas(sp.img, { x: 0, y: 0, w: sp.img.width, h: sp.img.height }, 1200).toDataURL("image/jpeg", .85);
   sp.status = "Finding faces… the first time takes a few seconds"; drawSplit();
   let boxes = null;
-  try { const fa = await loadFaceApi(); if (G?.split !== sp) return; boxes = await findFaces(fa, sp.img); }
+  try { const fa = await loadFaceApi(); if (SP !== sp) return; boxes = await findFaces(fa, sp.img); }
   catch (e) { boxes = null; }
-  if (G?.split !== sp) return;
+  if (SP !== sp) return;
   sp.busy = false;
   if (!boxes) sp.status = "Couldn't run face finding here. Tap each person on the photo to add them.";
   else if (!boxes.length) sp.status = "No faces found. Tap each person on the photo to add them.";
@@ -2177,9 +2200,9 @@ function addSplitFace(sp, b) {
   sp.faces.push({ box: b, crop: r, on: true, name: "", thumb: cropCanvas(sp.img, r, 240).toDataURL("image/jpeg", .8) });
 }
 function splitHTML() {
-  const sp = G && G.split; if (!sp) return "";
-  const left = MAX_CARDS - G.cards.length, on = sp.faces.filter(f => f.on), n = on.length;
-  const canMe = !iHaveCard();
+  const sp = SP; if (!sp) return "";
+  const left = sp.target.slots(), on = sp.faces.filter(f => f.on), n = on.length;
+  const canMe = sp.target.canMe();
   return `
     <div class="panel addcard split" id="addPanel">
       <div class="panel-head"><h2>Cards from a group photo</h2><button type="button" class="link" id="spClose">Close</button></div>
@@ -2197,13 +2220,12 @@ function splitHTML() {
     </div>`;
 }
 function drawSplit() {
-  if (!$("addSlot")) return;
-  $("addSlot").innerHTML = G && G.split ? splitHTML() : addPanelHTML();
-  if (G && G.split) wireSplit(); else wireCardForm();
+  if (!SP) return;
+  SP.target.mount(splitHTML()); wireSplit();
 }
 function wireSplit() {
-  const sp = G.split;
-  $("spClose").onclick = () => { G.split = null; drawSplit(); };
+  const sp = SP; if (!sp || !$("spClose")) return;
+  $("spClose").onclick = () => { const t = sp.target; SP = null; t.mount(""); };
   const ph = $("spPhoto");
   if (ph && !sp.busy) ph.onclick = e => {
     const box = e.target.closest("[data-spb]");
@@ -2220,30 +2242,26 @@ function wireSplit() {
   if ($("spSave")) $("spSave").onclick = saveSplit;
 }
 async function saveSplit() {
-  const sp = G.split, todo = sp.faces.map((f, i) => ({ f, i })).filter(x => x.f.on);
+  const sp = SP, todo = sp.faces.map((f, i) => ({ f, i })).filter(x => x.f.on);
   const unnamed = todo.find(x => !x.f.name.trim());
   if (unnamed) { toast(`Give face ${unnamed.i + 1} a name, or leave it out`); app.querySelector(`[data-spn="${unnamed.i}"]`)?.focus(); return; }
   const btn = $("spSave"); btn.disabled = true;
   let done = 0;
   for (const { f, i } of todo) {
-    if (G?.split !== sp) return;
+    if (SP !== sp) return;
     btn.firstChild.textContent = `Adding ${done + 1} of ${todo.length}…`;
     try {
       const blob = await new Promise(r => cropCanvas(sp.img, f.crop, 900).toBlob(r, "image/jpeg", .86));
       const url = await uploadBlob(blob);
-      const { error } = await sb.rpc("add_draft_card", { p_draft: G.id, p_name: f.name.trim(), p_image: url, p_is_me: sp.me === i });
-      if (error) throw new Error(errMsg(error));
+      await sp.target.addOne(f.name.trim(), url, sp.me === i);
       f.on = false; f.added = true; done++;
     } catch (e) { toast(`${f.name.trim()}: ${e.message}`); break; }
   }
-  if (!G || G.split !== sp) return;
+  if (SP !== sp) return;
   const remaining = sp.faces.filter(f => f.on && !f.added).length;
-  if (!remaining) G.split = null; else { sp.faces = sp.faces.filter(f => !f.added); sp.me = -1; }
-  if (done) notifyGroup(G.id, "cards");
+  if (!remaining) SP = null; else { sp.faces = sp.faces.filter(f => !f.added); sp.me = -1; }
   toast(done ? `${done} card${done === 1 ? "" : "s"} added` : "No cards were added");
-  await loadDraft(); if (!G) return;
-  renderDraft(true);
-  if (done) scrollToCard(Math.max(0, G.cards.length - done));
+  await sp.target.finish(done);
 }
 
 
@@ -2380,6 +2398,7 @@ function placesHTML(slots) {
     </div>`;
 }
 function openPlaces(target) {
+  if (SP) { const t = SP.target; SP = null; t.mount(""); }
   // target: { slots(), add(names) -> Promise, mount(html), wire() }
   PS = { q: PS?.q || "", results: [], msg: "", busy: false, label: "", target };
   target.mount(placesHTML(target.slots())); wirePlaces();
@@ -2794,12 +2813,15 @@ function renderEditor(restored) {
         </div>
 
         <div class="panel" id="cardsPanel">
-          <div class="panel-head"><h2>Cards <span class="count" id="cardCount">${E.cards.length}</span></h2><span class="needs" id="needs"></span></div>
+          <div class="panel-head"><h2>Cards <span class="count" id="cardCount">${E.cards.length}</span></h2><span class="head-right"><span class="needs" id="needs"></span>${E.cards.some(nonBlankCard) ? `<button type="button" class="link small-link danger" id="clearCards">Clear all</button>` : ""}</span></div>
           <p>${MIN_CARDS}–${MAX_CARDS} cards. Add a photo to make them yours.</p>
-          <div class="add-opts two">
+          <div class="add-opts">
             <button type="button" class="add-big hero" id="mapCardsTop"><span class="ab-ic">${MAP_PIN}</span><span class="ab-t"><b>From the map</b><small>Search Google Maps and add places with their photos</small></span></button>
+            <button type="button" class="add-big" id="photoCardsTop"><span class="ab-ic">${CAMERA}</span><span class="ab-t"><b>From a group photo</b><small>One card per face</small></span></button>
             <button type="button" class="add-big" id="addCardTop"><span class="ab-ic">${PLUS}</span><span class="ab-t"><b>Type one in</b><small>Any name, your own photo</small></span></button>
           </div>
+          <input type="file" id="edSpFile" accept="image/*" hidden>
+          <div id="splitSlot">${SP && SP.target.kind === "editor" ? splitHTML() : ""}</div>
           <div id="placesSlot">${PS && PS.target.kind === "editor" ? placesHTML(PS.target.slots()) : ""}</div>
           <div class="card-eds">${E.cards.map((c, i) => cardEditorHTML(c, i)).join("")}</div>
           <div class="head-btns"><button type="button" class="btn ghost small" id="addCard" ${E.cards.length >= MAX_CARDS ? "disabled" : ""}>${PLUS}Add card</button><button type="button" class="btn ghost small" id="mapCards">${MAP_PIN}From the map</button></div>
@@ -2934,6 +2956,15 @@ function wireEditor() {
   $("saveDeck").onclick = saveDeck;
   $("mapCards").onclick = $("mapCardsTop").onclick = () => openPlaces(editorPlacesTarget());
   $("addCardTop").onclick = () => $("addCard").click();
+  $("photoCardsTop").onclick = () => { $("edSpFile").value = ""; $("edSpFile").click(); };
+  $("edSpFile").onchange = e => { const f = e.target.files && e.target.files[0]; if (f) { startSplit(f, editorSplitTarget()); $("splitSlot").scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" }); } };
+  if (SP && SP.target.kind === "editor") wireSplit();
+  const cc = $("clearCards");
+  if (cc) cc.onclick = () => {
+    if (!cc.classList.contains("sure")) { cc.classList.add("sure"); cc.textContent = `Remove all ${E.cards.filter(nonBlankCard).length} cards?`; setTimeout(() => { if (cc.isConnected) { cc.classList.remove("sure"); cc.textContent = "Clear all"; } }, 3500); return; }
+    E.cards = blankDeck().cards.map(c => ({ ...c, vals: E.stats.map(() => "") })); E.sel = 0; saveDraft();
+    rerender("#cardsPanel"); toast("All cards cleared");
+  };
   if (PS && PS.target.kind === "editor") wirePlaces();
   $("pvToggle").onclick = () => { const side = app.querySelector(".ed-side"), on = side.classList.toggle("show-pv"); $("pvToggle").setAttribute("aria-expanded", on); $("pvToggle").textContent = on ? "Hide" : "Preview"; };
 }
@@ -3006,7 +3037,7 @@ function leaveGame() {
   if (typeof E !== "undefined" && E) { clearTimeout(draftTimer); persistDraft(); E = null; }
   if (gameChan) { sb.removeChannel(gameChan); gameChan = null; }
   if (homeChan) { sb.removeChannel(homeChan); homeChan = null; }
-  clearInterval(tick); tick = 0; gameId = null; V = null; L = null; PS = null; renderedKey = ""; queue = []; skipped = 0;
+  clearInterval(tick); tick = 0; gameId = null; V = null; L = null; PS = null; SP = null; renderedKey = ""; queue = []; skipped = 0;
 }
 async function openGame(id) {
   leaveGame();
