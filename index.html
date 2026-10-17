@@ -835,6 +835,18 @@ a.btn.ghost { color: var(--ink); }
 .places .fine a { color: inherit; }
 .places .actions { justify-content: flex-start; min-height: 0; }
 .head-btns .btn svg { width: 16px; height: 16px; }
+
+/* Google Places */
+.gcredit { position: absolute; left: 8px; top: 8px; z-index: 1; max-width: 70%; font-size: 9.5px; font-weight: 600; line-height: 1.4; padding: 2px 7px; border-radius: 999px; background: rgba(0, 0, 0, .45); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.mart .gcredit, .tile .gcredit, .ce-photo .gcredit { font-size: 0; padding: 0; width: 6px; height: 6px; left: 5px; top: 5px; background: #fff; opacity: .8; }
+.rc-art .gcredit { left: auto; right: 12px; top: auto; bottom: 12px; }
+img.gplace:not([src]) { opacity: 0; }
+img.gplace { transition: opacity .3s; }
+.pl-row.g { grid-template-columns: auto 48px minmax(0, 1fr); }
+.pl-thumb { width: 48px; height: 48px; border-radius: 10px; overflow: hidden; background: var(--line); }
+.pl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pl-credit { font-size: 10.5px !important; opacity: .8; }
+.pl-src .gm { font-weight: 700; color: var(--ink); margin-right: 4px; }
 </style>
 </head>
 <body>
@@ -892,12 +904,12 @@ const errMsg = e => (e && (e.message || e.error_description)) || "Something went
 async function loadDecks() {
   const [{ data: decks, error: e1 }, { data: cards, error: e2 }] = await Promise.all([
     sb.from("decks").select("*").order("sort").order("created_at", { ascending: false }),
-    sb.from("deck_cards").select("deck_key, idx, name, vals, image_url").order("idx")
+    sb.from("deck_cards").select("deck_key, idx, name, vals, image_url, place_id").order("idx")
   ]);
   if (e1 || e2) throw (e1 || e2);
   DECKS = {};
   decks.forEach(d => { DECKS[d.key] = { key: d.key, name: d.name, blurb: d.blurb, hues: [d.hue_from, d.hue_to], stats: d.stats, cards: [], images: [], owner: d.owner || null, custom: !!d.owner, archived: !!d.archived, group: !!d.draft_id, draftId: d.draft_id || null }; });
-  cards.forEach(c => { if (DECKS[c.deck_key]) { DECKS[c.deck_key].cards[c.idx] = [c.name, ...c.vals.map(Number)]; DECKS[c.deck_key].images[c.idx] = c.image_url || null; } });
+  cards.forEach(c => { if (DECKS[c.deck_key]) { DECKS[c.deck_key].cards[c.idx] = [c.name, ...c.vals.map(Number)]; DECKS[c.deck_key].images[c.idx] = c.image_url || null; (DECKS[c.deck_key].places = DECKS[c.deck_key].places || [])[c.idx] = c.place_id || null; } });
 }
 async function loadNames(ids) {
   const need = ids.filter(id => id && !(id in names));
@@ -913,7 +925,7 @@ async function saveName(n) {
   if (error) { toast(errMsg(error)); return false; }
   myName = n; names[me] = n; return true;
 }
-const card = (d, idx) => ({ id: idx, name: d.cards[idx][0], v: d.cards[idx].slice(1), image: (d.images && d.images[idx]) || null });
+const card = (d, idx) => ({ id: idx, name: d.cards[idx][0], v: d.cards[idx].slice(1), image: (d.images && d.images[idx]) || null, place: (d.places && d.places[idx]) || null });
 const hueOf = (d, id) => Math.round(d.hues[0] + (d.hues[1] - d.hues[0]) * id / Math.max(1, d.cards.length - 1));
 const strength = (d, i, v) => { const vals = d.cards.map(c => c[i + 1]); const worse = vals.filter(x => d.stats[i].low ? x > v : x < v).length; return worse / (vals.length - 1); };
 
@@ -1306,6 +1318,7 @@ function monogram(name) {
 }
 function artFor(d, c) {
   if (c.image) return `<img class="illus photo" src="${esc(c.image)}" alt="" loading="lazy">`;
+  if (c.place) return placeImg(c.place);
   if (d.custom) return monogram(c.name);
   if (d.key === "cats" || CAT_ART[c.name]) return catSVG(c.name, c.id);
   if (d.key === "cars" || CAR_ART[c.name]) return carSVG(c.name, c.id);
@@ -1711,7 +1724,7 @@ function leaveDraft() {
   if (G.chan) sb.removeChannel(G.chan);
   clearTimeout(gTimer); G = null;
 }
-const draftSig = () => JSON.stringify([G.d.name, G.d.blurb, G.d.hue, G.d.stats, G.d.deck_key, G.d.status, G.members.map(m => m.user_id), G.cards.map(c => [c.id, c.name, c.image_url, c.subject])]);
+const draftSig = () => JSON.stringify([G.d.name, G.d.blurb, G.d.hue, G.d.stats, G.d.deck_key, G.d.status, G.members.map(m => m.user_id), G.cards.map(c => [c.id, c.name, c.image_url, c.place_id, c.subject])]);
 function scheduleDraftReload() {
   clearTimeout(gTimer);
   gTimer = setTimeout(async () => {
@@ -1750,7 +1763,7 @@ function rateCardHTML(c, i) {
   const who = c.subject ? (own ? "You" : `${esc(names[c.subject] || "Player")}`) : "";
   return `
   <article class="rate-card${own ? " own" : ""}" data-rc="${c.id}" style="--h:${G.d.hue}">
-    <div class="rc-art">${c.image_url ? `<img src="${esc(c.image_url)}" alt="" loading="lazy">` : `<span class="rc-mono">${initials(c.name)}</span>`}
+    <div class="rc-art">${c.image_url ? `<img src="${esc(c.image_url)}" alt="" loading="lazy">` : c.place_id ? placeImg(c.place_id) : `<span class="rc-mono">${initials(c.name)}</span>`}
       <div class="rc-top"><span class="chip">${i + 1} / ${n}</span>${who ? `<span class="chip me-chip">${own ? "This is you" : `This is ${who}`}</span>` : ""}</div>
       <h3>${esc(c.name)}</h3>
     </div>
@@ -2217,6 +2230,38 @@ async function saveSplit() {
 }
 
 
+
+/* Google Places: search with photos when the key is set up; cards keep the place ID and show its photo live */
+let googleOn = null;
+function googlePlacesOn() {
+  if (googleOn === null) googleOn = (sb && !offline ? sb.functions.invoke("places", { body: { check: true } }).then(r => !!(r.data && r.data.enabled)).catch(() => false) : Promise.resolve(false));
+  return googleOn;
+}
+async function searchGoogle(q) {
+  const { data, error } = await sb.functions.invoke("places", { body: { q } });
+  if (error) { let msg = null; try { msg = (await error.context.json()).error; } catch (e) {} throw new Error(msg || "Google search didn't work. Try again, or use OpenStreetMap."); }
+  if (!data || !data.enabled) throw new Error("Google search isn't switched on.");
+  return { label: q.replace(/^./, c => c.toUpperCase()), google: true, results: (data.results || []).map(r => ({ ...r, sub: [r.kind, r.sub].filter(Boolean).join(" · ") })) };
+}
+const placePhotos = new Map();
+function placeImg(id) { return `<img class="illus photo gplace" data-place="${esc(id)}" alt="" loading="lazy"><span class="gcredit" data-credit="${esc(id)}">Google Maps</span>`; }
+function placePhoto(id) {
+  if (!placePhotos.has(id)) placePhotos.set(id, fetch(`${SUPABASE_URL}/functions/v1/place-photo?id=${encodeURIComponent(id)}&w=640`, { headers: { apikey: SUPABASE_KEY } }).then(r => r.ok ? r.json() : null).catch(() => null));
+  return placePhotos.get(id);
+}
+function hydratePlaces(root) {
+  (root || document).querySelectorAll("img[data-place]:not([data-done])").forEach(img => {
+    img.dataset.done = "1";
+    placePhoto(img.dataset.place).then(p => {
+      if (!p || !p.uri) { img.remove(); return; }
+      img.src = p.uri;
+      const cr = img.parentElement && img.parentElement.querySelector(`[data-credit="${CSS.escape(img.dataset.place)}"]`);
+      if (cr) { cr.textContent = p.credit ? `${p.credit} · Google Maps` : "Google Maps"; cr.title = "Photo from Google Maps"; }
+    });
+  });
+}
+new MutationObserver(() => hydratePlaces(app)).observe(app, { childList: true, subtree: true });
+
 /* ---------- Map search: find real places (OpenStreetMap) and turn them into cards ---------- */
 const OSM_SEARCH = "https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&extratags=1&accept-language=en";
 const PLACE_KINDS = [
@@ -2311,9 +2356,10 @@ function placesHTML(slots) {
       ${s.results.length ? `
         <div class="pl-head"><b>${esc(s.label)}</b><span>${picked} of ${s.results.length} ticked${picked > slots ? ` · only ${slots} fit` : ""}</span><button type="button" class="link small-link" id="plAll">${picked ? "Untick all" : "Tick all"}</button></div>
         <ul class="pl-list">${s.results.map((r, i) => `
-          <li><label class="pl-row${r.on ? " on" : ""}"><input type="checkbox" data-pli="${i}" ${r.on ? "checked" : ""}><span class="pl-main"><b>${esc(r.name)}</b><small>${esc(r.sub)}</small></span></label></li>`).join("")}</ul>
+          <li><label class="pl-row${r.on ? " on" : ""}${s.google ? " g" : ""}"><input type="checkbox" data-pli="${i}" ${r.on ? "checked" : ""}>${s.google ? `<span class="pl-thumb">${r.photo ? `<img src="${esc(r.photo)}" alt="" loading="lazy">` : ""}</span>` : ""}<span class="pl-main"><b>${esc(r.name)}</b><small>${esc(r.sub)}</small>${r.credit ? `<small class="pl-credit">Photo: ${esc(r.credit)}</small>` : ""}</span></label></li>`).join("")}</ul>
         <div class="actions"><button type="button" class="btn primary" id="plAdd" ${picked && picked <= slots ? "" : "disabled"}>Add ${picked || ""} card${picked === 1 ? "" : "s"}${ARROW}</button></div>` : ""}
-      <p class="fine">Places from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors. Cards start without photos; add your own.</p>
+      ${s.google ? `<p class="fine pl-src"><span class="gm">Google Maps</span> Results and photos from Google Maps. Cards show the photo live from Google. <button type="button" class="link small-link inline" id="plOsm">Search OpenStreetMap instead</button></p>`
+        : `<p class="fine">Places from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors. Cards start without photos; add your own.${s.osm ? ` <button type="button" class="link small-link inline" id="plGoogle">Use Google instead</button>` : ""}</p>`}
     </div>`;
 }
 function openPlaces(target) {
@@ -2328,6 +2374,8 @@ function redrawPlaces() { if (!PS) return; const y = window.scrollY; PS.target.m
 function wirePlaces() {
   if (!PS || !$("placesPanel")) return;
   $("plClose").onclick = closePlaces;
+  if ($("plOsm")) $("plOsm").onclick = () => { PS.osm = true; runPlaces(); };
+  if ($("plGoogle")) $("plGoogle").onclick = () => { PS.osm = false; runPlaces(); };
   $("plQ").oninput = e => { PS.q = e.target.value; };
   $("plForm").onsubmit = e => { e.preventDefault(); runPlaces(); };
   app.querySelectorAll("[data-plk]").forEach(b => b.onclick = () => {
@@ -2339,7 +2387,7 @@ function wirePlaces() {
   app.querySelectorAll("[data-pli]").forEach(c => c.onchange = () => { PS.results[+c.dataset.pli].on = c.checked; redrawPlaces(); });
   if ($("plAll")) $("plAll").onclick = () => { const any = PS.results.some(r => r.on); PS.results.forEach((r, i) => r.on = !any && i < PS.target.slots()); redrawPlaces(); };
   if ($("plAdd")) $("plAdd").onclick = async () => {
-    const names = PS.results.filter(r => r.on).map(r => r.name.slice(0, 24));
+    const names = PS.results.filter(r => r.on).map(r => ({ name: r.name.slice(0, 24), place: r.place || null }));
     $("plAdd").disabled = true; $("plAdd").firstChild.textContent = "Adding…";
     const t = PS.target;
     try { await t.add(names); PS = null; } catch (e) { toast(e.message || "Couldn't add those places"); redrawPlaces(); }
@@ -2347,14 +2395,20 @@ function wirePlaces() {
 }
 async function runPlaces() {
   const q = (PS.q || "").trim(); if (!q) return toast("Type what and where, like pubs in Brixton");
-  PS.busy = true; PS.msg = "Searching the map…"; PS.results = []; redrawPlaces();
+  PS.busy = true; PS.msg = "Searching the map…"; PS.note = ""; PS.results = []; redrawPlaces();
   try {
-    const r = await searchPlaces(q);
+    let r = null;
+    if (!PS.osm && await googlePlacesOn()) {
+      try { r = await searchGoogle(q); } catch (e) { PS.note = e.message + " Showing OpenStreetMap instead."; }
+    }
+    if (!r) r = await searchPlaces(q);
     if (!PS) return;
     const slots = PS.target.slots();
-    PS.label = r.label;
-    PS.results = r.results.slice(0, 40).map((x, i) => ({ name: x.name, sub: placeSub(x, r.centre), on: i < Math.min(slots, 16) }));
-    PS.msg = PS.results.length ? "" : "Nothing found there. Try a nearby area, or a different kind of place.";
+    PS.label = r.label; PS.google = !!r.google;
+    PS.results = r.results.slice(0, 40).map((x, i) => r.google
+      ? { name: x.name, sub: x.sub, photo: x.photo, credit: x.credit, place: x.id, on: i < Math.min(slots, 16) }
+      : { name: x.name, sub: placeSub(x, r.centre), on: i < Math.min(slots, 16) });
+    PS.msg = PS.results.length ? (PS.note || "") : "Nothing found there. Try a nearby area, or a different kind of place.";
   } catch (e) { if (PS) { PS.msg = e.message || "The map search didn't work. Try again."; } }
   if (!PS) return;
   PS.busy = false; redrawPlaces();
@@ -2368,22 +2422,24 @@ const groupPlacesTarget = () => ({ kind: "group",
     let n = 0;
     try {
       for (const nm of names) {
-        const { error } = await sb.rpc("add_draft_card", { p_draft: G.id, p_name: nm, p_image: null, p_is_me: false });
+        const { error } = nm.place
+          ? await sb.rpc("add_draft_place", { p_draft: G.id, p_name: nm.name, p_place: nm.place })
+          : await sb.rpc("add_draft_card", { p_draft: G.id, p_name: nm.name, p_image: null, p_is_me: false });
         if (error) throw new Error(errMsg(error));
         n++;
       }
     } finally {
       PS = null;
-      if (n) { notifyGroup(G.id, "cards"); toast(`${n} card${n === 1 ? "" : "s"} added. Add photos with Edit on each card.`); }
+      if (n) { notifyGroup(G.id, "cards"); toast(`${n} card${n === 1 ? "" : "s"} added${names.some(x => x.place) ? "" : ". Add photos with Edit on each card"}.`); }
       if (G) { await loadDraft(); if (G) renderDraft(true); }
     }
   } });
 const editorPlacesTarget = () => ({ kind: "editor",
-  slots: () => E ? MAX_CARDS - E.cards.filter(c => c.name.trim() || c.image || c.vals.some(v => String(v).trim())).length : 0,
+  slots: () => E ? MAX_CARDS - E.cards.filter(c => c.name.trim() || c.image || c.place || c.vals.some(v => String(v).trim())).length : 0,
   mount: html => { const el = $("placesSlot"); if (el) el.innerHTML = html; },
   add: async names => {
-    E.cards = E.cards.filter(c => c.name.trim() || c.image || c.vals.some(v => String(v).trim()));
-    names.slice(0, MAX_CARDS - E.cards.length).forEach(nm => E.cards.push({ name: nm, vals: E.stats.map(() => ""), image: null }));
+    E.cards = E.cards.filter(c => c.name.trim() || c.image || c.place || c.vals.some(v => String(v).trim()));
+    names.slice(0, MAX_CARDS - E.cards.length).forEach(nm => E.cards.push({ name: nm.name, vals: E.stats.map(() => ""), image: null, place: nm.place }));
     E.sel = Math.max(0, E.cards.length - names.length); saveDraft();
     PS = null; rerender("#cardsPanel", `[data-cv="${E.sel}-0"]`);
     toast(`${names.length} card${names.length === 1 ? "" : "s"} added. Now give them their stats.`);
@@ -2461,7 +2517,7 @@ async function home(pendingCode) {
   }
   const deckTiles = playableDecks().map(d => `
     <button type="button" class="tile" data-deck="${d.key}">
-      ${(() => { const sample = card(d, d.key === "cars" ? 12 : 0), pic = d.custom && !sample.image ? "" : artFor(d, sample); return `<span class="art${pic ? " has-illus" : ""}" style="--h:${hueOf(d, sample.id)}">${pic}<span class="num" aria-hidden="true">${d.cards.length}</span></span>`; })()}
+      ${(() => { const sample = card(d, d.key === "cars" ? 12 : 0), pic = d.custom && !sample.image && !sample.place ? "" : artFor(d, sample); return `<span class="art${pic ? " has-illus" : ""}" style="--h:${hueOf(d, sample.id)}">${pic}<span class="num" aria-hidden="true">${d.cards.length}</span></span>`; })()}
       <span class="tile-body"><b>${esc(d.name)}${d.custom ? ` <em class="mine">${d.group ? "Group deck" : "Your deck"}</em>` : ""}</b><span>${esc(d.blurb || "")}</span><span class="stat-list">${d.cards.length} cards · ${d.stats.map(s => esc(s.label)).join(", ")}</span></span>
       <span class="go" aria-hidden="true">${ARROW}</span>
     </button>`).join("");
@@ -2637,7 +2693,7 @@ function blankDeck() {
 function deckToEditor(d) {
   return { key: d.key, name: d.name, blurb: d.blurb || "", hue: d.hues[0],
     stats: d.stats.map(s => ({ label: s.label, unit: s.unit || "", low: !!s.low })),
-    cards: d.cards.map((c, i) => ({ name: c[0], vals: c.slice(1).map(v => String(v)), image: (d.images && d.images[i]) || null })), sel: 0 };
+    cards: d.cards.map((c, i) => ({ name: c[0], vals: c.slice(1).map(v => String(v)), image: (d.images && d.images[i]) || null, place: (d.places && d.places[i]) || null })), sel: 0 };
 }
 const draftKey = () => "sa-draft-" + (E.key || "new");
 // Only keep a draft when it differs from what's saved (or, for a new deck, when something has been typed)
@@ -2670,7 +2726,7 @@ function editorDeck() {
   const vals = E.cards.map(c => E.stats.map((_, i) => { const n = parseNum(c.vals[i]); return Number.isFinite(n) ? n : 0; }));
   return { key: "draft", owner: me, custom: true, name: E.name.trim() || "Your deck", hues: [E.hue, (E.hue + 36) % 360],
     stats: E.stats.map((s, i) => ({ label: s.label.trim() || `Stat ${i + 1}`, unit: s.unit.trim(), low: s.low })),
-    cards: E.cards.map((c, i) => [c.name.trim() || `Card ${i + 1}`, ...vals[i]]), images: E.cards.map(c => c.image) };
+    cards: E.cards.map((c, i) => [c.name.trim() || `Card ${i + 1}`, ...vals[i]]), images: E.cards.map(c => c.image), places: E.cards.map(c => c.place || null) };
 }
 function problems() {
   const out = [];
@@ -2750,8 +2806,8 @@ function renderEditor(restored) {
 function cardEditorHTML(c, i) {
   return `
     <div class="ce${i === E.sel ? " sel" : ""}" data-ci="${i}">
-      <button type="button" class="ce-photo${c.image ? " has" : ""}" data-cp="${i}" style="--h:${E.hue}" aria-label="${c.image ? "Change" : "Add"} photo for card ${i + 1}">
-        ${c.image ? `<img src="${esc(c.image)}" alt="">` : `${CAMERA}<span>Photo</span>`}
+      <button type="button" class="ce-photo${c.image || c.place ? " has" : ""}" data-cp="${i}" style="--h:${E.hue}" aria-label="${c.image || c.place ? "Change" : "Add"} photo for card ${i + 1}">
+        ${c.image ? `<img src="${esc(c.image)}" alt="">` : c.place ? placeImg(c.place) : `${CAMERA}<span>Photo</span>`}
       </button>
       <div class="ce-main">
         <div class="ce-head">
@@ -2763,7 +2819,7 @@ function cardEditorHTML(c, i) {
           <label class="vfield"><span>${esc(s.label.trim() || `Stat ${j + 1}`)}${s.unit.trim() ? ` <small>${esc(s.unit.trim())}</small>` : ""}</span>
           <input data-cv="${i}-${j}" inputmode="decimal" value="${esc(c.vals[j] ?? "")}" placeholder="0" autocomplete="off"></label>`).join("")}
         </div>
-        ${c.image ? `<button type="button" class="link small-link" data-cpx="${i}">Remove photo</button>` : ""}
+        ${c.image || c.place ? `<button type="button" class="link small-link" data-cpx="${i}">Remove photo</button>` : ""}
       </div>
     </div>`;
 }
@@ -2838,7 +2894,7 @@ function wireEditor() {
   // photos
   let photoFor = -1;
   app.querySelectorAll("[data-cp]").forEach(b => b.onclick = () => { photoFor = +b.dataset.cp; select(photoFor); $("photoIn").value = ""; $("photoIn").click(); });
-  app.querySelectorAll("[data-cpx]").forEach(b => b.onclick = () => { E.cards[+b.dataset.cpx].image = null; saveDraft(); rerender("#cardsPanel"); });
+  app.querySelectorAll("[data-cpx]").forEach(b => b.onclick = () => { E.cards[+b.dataset.cpx].image = null; E.cards[+b.dataset.cpx].place = null; saveDraft(); rerender("#cardsPanel"); });
   $("photoIn").onchange = async e => {
     const f = e.target.files && e.target.files[0], i = photoFor;
     if (!f || i < 0) return;
@@ -2846,7 +2902,7 @@ function wireEditor() {
     try {
       const url = await uploadPhoto(f);
       if (!E || !E.cards[i]) return;
-      E.cards[i].image = url; saveDraft(); rerender("#cardsPanel");
+      E.cards[i].image = url; E.cards[i].place = null; saveDraft(); rerender("#cardsPanel");
     } catch (err) {
       toast(err.message || "That photo couldn't be uploaded. Try another.");
       rerender("#cardsPanel");
@@ -2904,7 +2960,7 @@ async function saveDeck() {
   const payload = {
     key: E.key, name: E.name.trim(), blurb: E.blurb.trim(), hue: E.hue,
     stats: E.stats.map(s => ({ label: s.label.trim(), unit: s.unit.trim(), low: !!s.low })),
-    cards: E.cards.map(c => ({ name: c.name.trim(), vals: E.stats.map((_, j) => parseNum(c.vals[j])), image: c.image && c.image.startsWith(PHOTO_PREFIX) ? c.image : null }))
+    cards: E.cards.map(c => ({ name: c.name.trim(), vals: E.stats.map((_, j) => parseNum(c.vals[j])), image: c.image && c.image.startsWith(PHOTO_PREFIX) ? c.image : null, place: c.image ? null : (c.place || null) }))
   };
   const { data: newKey, error } = await sb.rpc("save_deck", { p_deck: payload });
   if (error) { btn.disabled = false; btn.firstChild.textContent = E.key ? "Save changes" : "Save deck"; return toast(errMsg(error)); }
