@@ -576,6 +576,98 @@ button.row:not(:disabled):active { transform: scale(.985); }
 #signOut.sure { font-weight: 700; }
 .loading { display: grid; place-items: center; min-height: 50vh; color: var(--muted); gap: 12px; }
 
+
+/* ---------- Group games (3-6 players) ---------- */
+a.btn { text-decoration: none; }
+a.btn.ghost { color: var(--ink); }
+.avatar.sm { width: 24px; height: 24px; font-size: 10.5px; }
+.avatar.sm svg { width: 13px; height: 13px; }
+.avatar.group { font-family: var(--f-display); font-size: 13px; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 12px 10px; }
+.pchip { display: flex; align-items: center; gap: 9px; min-width: 0; transition: opacity .35s; }
+.pchip .ring .fg { stroke: var(--them); }
+.pchip.you .ring .fg { stroke: var(--accent); }
+.pchip.active .ring { opacity: 1; }
+.pchip.active .ring.urgent { animation: tick 1s ease-in-out infinite; }
+.pchip.out { opacity: .42; }
+.pchip.out .pinfo b { text-decoration: line-through; text-decoration-color: var(--muted); }
+.pchip .av-wrap, .pchip .avatar { width: 32px; height: 32px; }
+.pchip .pinfo b { font-size: 13.5px; }
+.round-row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted); }
+.round-row b { font-family: var(--f-data); color: var(--ink); font-weight: 600; }
+.round-row .pot { margin-top: 0; }
+.share-bar { flex: 1; display: flex; gap: 2px; height: 6px; border-radius: 3px; overflow: hidden; min-width: 60px; }
+.share-bar i { flex: 1 1 0; flex-basis: 0; background: var(--c); transition: flex-grow .7s var(--ease); min-width: 0; }
+.table.multi { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.table.multi .slot.you { width: min(100%, 360px); justify-self: center; }
+.table.multi .out-back { min-height: 220px; }
+.opps { order: -1; display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: 10px; }
+.opps.n2 { --cols: 2; } .opps.n3 { --cols: 3; } .opps.n4 { --cols: 4; } .opps.n5 { --cols: 3; }
+.opp { display: grid; gap: 6px; min-width: 0; animation: deal .5s var(--ease) both; transition: opacity .4s, transform .45s var(--ease), filter .4s; }
+.opp:nth-child(2) { animation-delay: .05s; } .opp:nth-child(3) { animation-delay: .1s; } .opp:nth-child(4) { animation-delay: .15s; } .opp:nth-child(5) { animation-delay: .2s; } .opp:nth-child(6) { animation-delay: .25s; }
+.opp-card { aspect-ratio: 5 / 6; perspective: 900px; min-width: 0; }
+.opp-card > .flipper, .opp-card > .card-back { height: 100%; }
+.opp-card.flipped .flipper { transform: rotateY(180deg); }
+.mini-back { border-radius: 14px; place-items: center; background:
+    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--them) 60%, transparent), transparent 70%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .045) 0 2px, transparent 2px 11px), var(--back); }
+.mini-back::before { inset: 6px; border-radius: 9px; }
+.mini-back .brand-mark { transform: scale(1.1); }
+.mini-out { height: 100%; border-radius: 14px; border: 1px dashed var(--line-strong); display: grid; place-items: center; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.opp.out { opacity: .55; }
+.opp-name { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12.5px; font-weight: 600; }
+.opp-name > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-card { height: 100%; display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); transition: border-color .3s, box-shadow .3s; }
+.art.mart { aspect-ratio: auto; flex: 1; min-height: 0; padding: 6px; align-items: flex-end; justify-content: flex-start; }
+.mstamp { display: none; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 7px; border-radius: 999px; background: #fff; color: #0f6b3d; }
+.mbody { display: grid; gap: 1px; padding: 6px 8px 7px; }
+.mbody b { font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mval { font-family: var(--f-data); font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums; }
+.mval small { font-family: var(--f-body); font-size: 10px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+.opp.win .mini-card { border-color: var(--win); box-shadow: 0 0 0 3px var(--win-soft), var(--shadow); }
+.opp.win .mval { color: var(--win); }
+.opp.win .mstamp { display: inline-block; animation: pop .45s var(--ease) both; }
+.opp.win { transform: translateY(-3px); }
+.opp.lose { opacity: .6; filter: saturate(.6); }
+.opp.draw .mini-card { border-color: var(--draw); }
+.opp.draw .mval { color: var(--draw); }
+.table.multi.to-pot .slot, .table.multi.to-pot .opp, .table.multi.to-you .opp, .table.multi.to-them .opp, .table.multi.to-them .slot.you { transform: translateY(18px) scale(.95); opacity: 0; }
+.table.multi.to-you .slot.you { transform: scale(.97); opacity: 0; transition-delay: .12s; }
+.lobby { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 520px; }
+.lseat { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px 6px 6px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13.5px; font-weight: 600; animation: pillIn .35s var(--ease) both; }
+.lseat em { font-style: normal; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.lseat.empty { background: transparent; border-style: dashed; color: var(--muted); font-weight: 500; }
+.lseat.empty .avatar { background: var(--surface-2); border: 1px dashed var(--line-strong); }
+.ranks { list-style: none; margin: 4px 0 0; padding: 0; width: min(420px, 100%); display: grid; gap: 6px; text-align: left; }
+.rank { display: grid; grid-template-columns: 1.4em auto minmax(0, 1fr) minmax(50px, 32%) 2.2em; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 14px; background: var(--surface-2); animation: pillIn .4s var(--ease) both; animation-delay: var(--d); }
+.rank.top { background: color-mix(in srgb, var(--them) 14%, var(--surface)); }
+.rank.you.top { background: var(--accent-soft); }
+.pos { font-family: var(--f-display); font-weight: 600; font-size: 13px; color: var(--muted); text-align: center; }
+.rname { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rname em { font-style: normal; font-size: 11px; font-weight: 500; color: var(--muted); }
+.rbar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.rbar i { display: block; height: 100%; border-radius: inherit; background: var(--them); }
+.rank.you .rbar i { background: var(--accent); }
+.rank b { font-family: var(--f-data); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+@media (min-width: 760px) {
+  .table.multi { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: start; }
+  .table.multi .slot.you { width: 100%; }
+  .opps { order: 0; }
+  .opps.n4 { --cols: 2; } .opps.n5 { --cols: 3; }
+}
+@media (max-width: 520px) {
+  .opps { gap: 8px; }
+  .opps.n4 { --cols: 4; }
+  .opps.n4 .opp-name, .opps.n5 .opp-name { font-size: 11.5px; }
+  .opps.n4 .opp-name .avatar { display: none; }
+  .pgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 6px; }
+  .pgrid.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pchip { gap: 7px; }
+  .pchip .av-wrap, .pchip .avatar { width: 28px; height: 28px; }
+  .pchip .pinfo b { font-size: 12.5px; }
+  .pchip .pcount { font-size: 11.5px; }
+  .rank { grid-template-columns: 1.2em auto minmax(0, 1fr) 54px 2em; gap: 7px; }
+}
 </style>
 </head>
 <body>
@@ -616,6 +708,10 @@ const LOCAL_DECKS = {
 let offline = false, offlineReason = "";
 let sb = null, me = null, myName = "", DECKS = {}, names = {}, clockOffset = 0;
 let timerSecs = Number(store.get("sa-timer")) || 30;
+let playerCount = (() => { const n = Number(store.get("sa-players")); return n >= 2 && n <= 6 ? n : 2; })();
+const setupNote = n => n > 2
+  ? `You'll get a code and a link for up to ${n - 1} friends. It starts when every seat is taken, or when you start it. 24h is for playing a turn whenever you get a minute.`
+  : "You'll get a code and a link to send your friend. 24h is for playing a turn whenever you get a minute.";
 let V = null, gameId = null, gameChan = null, homeChan = null, tick = 0, claimedFor = null, renderedKey = "", busy = false, queue = [], skipped = 0;
 
 function toast(msg) {
@@ -1164,11 +1260,16 @@ async function home(pendingCode) {
     ${pendingCode ? "" : `
     <div class="panel">
       <h2>Start a game</h2>
-      <div class="setup"><span class="section-title" id="timerLbl">Turn timer</span>
-        <div class="seg" role="radiogroup" aria-labelledby="timerLbl">${TIMERS.map(t => `<input type="radio" name="timer" id="timer${t.s}" value="${t.s}" ${t.s === timerSecs ? "checked" : ""}><label for="timer${t.s}">${t.l}</label>`).join("")}</div>
+      <div class="setup-row">
+        <div class="setup"><span class="section-title" id="playersLbl">Players</span>
+          <div class="seg" role="radiogroup" aria-labelledby="playersLbl">${[2, 3, 4, 5, 6].map(n => `<input type="radio" name="players" id="players${n}" value="${n}" ${n === playerCount ? "checked" : ""}><label for="players${n}">${n}</label>`).join("")}</div>
+        </div>
+        <div class="setup"><span class="section-title" id="timerLbl">Turn timer</span>
+          <div class="seg" role="radiogroup" aria-labelledby="timerLbl">${TIMERS.map(t => `<input type="radio" name="timer" id="timer${t.s}" value="${t.s}" ${t.s === timerSecs ? "checked" : ""}><label for="timer${t.s}">${t.l}</label>`).join("")}</div>
+        </div>
       </div>
       <div class="decks">${deckTiles}</div>
-      <p class="note">You'll get a code and a link to send your friend. 24h is for playing a turn whenever you get a minute.</p>
+      <p class="note" id="setupNote">${setupNote(playerCount)}</p>
     </div>
     ${myDecksPanel()}
     ${accountHTML()}
@@ -1194,12 +1295,16 @@ async function home(pendingCode) {
   app.querySelectorAll("[data-deck]").forEach(b => b.onclick = async () => {
     if (busy || !(await needName())) return;
     const t = app.querySelector('input[name="timer"]:checked'); timerSecs = t ? +t.value : 30; store.set("sa-timer", timerSecs);
+    const pc = app.querySelector('input[name="players"]:checked'); playerCount = pc ? +pc.value : 2; store.set("sa-players", playerCount);
     busy = true;
-    const { data, error } = await sb.rpc("create_game", { p_deck: b.dataset.deck, p_timer: timerSecs });
+    const { data, error } = playerCount > 2
+      ? await sb.rpc("new_game", { p_deck: b.dataset.deck, p_timer: timerSecs, p_players: playerCount })
+      : await sb.rpc("create_game", { p_deck: b.dataset.deck, p_timer: timerSecs });
     busy = false;
     if (error) return toast(errMsg(error));
     openGame(data.game.id);
   });
+  app.querySelectorAll('input[name="players"]').forEach(r => r.onchange = () => { $("setupNote").textContent = setupNote(+r.value); });
   const doJoin = async () => { const c = $("joinCode").value.trim().toUpperCase(); if (c.length !== 6) return toast("Codes are 6 characters"); if (await needName()) joinGame(c); };
   $("joinBtn").onclick = doJoin;
   $("joinCode").addEventListener("keydown", e => { if (e.key === "Enter") doJoin(); });
@@ -1211,31 +1316,48 @@ async function renderGameList() {
   const list = $("games"); if (!list) return;
   const { data, error } = await sb.from("games").select("*").neq("status", "cancelled").order("updated_at", { ascending: false }).limit(25);
   if (error) { list.innerHTML = `<li class="empty">${esc(errMsg(error))}</li>`; return; }
-  if (!data.length) { list.innerHTML = `<li class="empty">No games yet. Start one above and send your friend the link.</li>`; return; }
-  await loadNames(data.flatMap(g => [g.p1, g.p2]));
+  if (!data.length) { list.innerHTML = `<li class="empty">No games yet. Start one above and send your friends the link.</li>`; return; }
+  const seatsOf = g => (g.players && g.players.length) ? g.players : [g.p1, g.p2].filter(Boolean);
+  await loadNames(data.flatMap(seatsOf));
   if (data.some(g => !DECKS[g.deck_key])) { try { await loadDecks(); } catch (e) {} }
   if (!$("games")) return;
   $("games").innerHTML = data.map(g => {
-    const mineP1 = g.p1 === me, opp = mineP1 ? g.p2 : g.p1, d = DECKS[g.deck_key];
-    const my = mineP1 ? g.p1_count : g.p2_count, their = mineP1 ? g.p2_count : g.p1_count;
-    let badge, sub;
-    if (g.status === "waiting") { badge = ""; sub = `${esc(d?.name || "")} · code ${esc(g.code)} · waiting`; }
-    else if (g.status === "finished") { const won = g.winner === me, tie = !g.winner; badge = `<span class="badge ${won ? "won" : tie ? "" : "lost"}">${won ? "Won" : tie ? "Draw" : "Lost"}${g.forfeited_by ? "" : ` ${my}–${their}`}</span>`; sub = `${esc(d?.name || "")} · ${g.forfeited_by ? (g.forfeited_by === me ? "you forfeited" : "they forfeited") : "finished"}`; }
-    else { const mine = g.turn === me; badge = `<span class="badge ${mine ? "go" : ""}">${mine ? "Your turn" : "Their turn"}</span>`; sub = `${esc(d?.name || "")} · round ${g.round} · ${my}–${their} cards`; }
-    const title = g.status === "waiting" ? "New game" : `vs ${esc(names[opp] || "Player")}`;
-    const item = `<button type="button" class="game-item" data-g="${g.id}"><span class="avatar them">${g.status === "waiting" ? "?" : initial(names[opp])}</span><span class="gi-main"><b>${title}</b><small>${sub}</small></span>${badge}</button>`;
-    return g.status === "waiting" && mineP1
+    const S = seatsOf(g), si = S.indexOf(me), d = DECKS[g.deck_key], multi = S.length > 2 || (g.max_players || 2) > 2;
+    const cnt = i => ((g.counts && g.counts.length) ? g.counts[i] : [g.p1_count, g.p2_count][i]) || 0;
+    const others = S.filter(p => p !== me), opp = others[0], host = S[0] === me;
+    const nm = id => esc(names[id] || "Player");
+    const vs = others.length === 1 ? `vs ${nm(opp)}` : `vs ${nm(others[0])}, ${nm(others[1])}${others.length > 2 ? ` +${others.length - 2}` : ""}`;
+    const out = (g.out_players || []).includes(me);
+    let badge, sub, title = vs;
+    if (g.status === "waiting") {
+      badge = ""; title = multi ? `${S.length} of ${g.max_players} players` : "New game";
+      sub = `${esc(d?.name || "")} · code ${esc(g.code)} · ${multi && !host ? `waiting for ${nm(S[0])} to start` : "waiting"}`;
+    } else if (g.status === "finished") {
+      const won = g.winner === me, tie = !g.winner;
+      badge = `<span class="badge ${won ? "won" : tie ? "" : "lost"}">${won ? "Won" : tie ? "Draw" : "Lost"}${g.forfeited_by || multi ? "" : ` ${cnt(si)}–${cnt(1 - si)}`}</span>`;
+      sub = `${esc(d?.name || "")} · ${multi ? `${S.length} players · ${out ? "you forfeited" : "finished"}` : g.forfeited_by ? (g.forfeited_by === me ? "you forfeited" : "they forfeited") : "finished"}`;
+    } else {
+      const mine = g.turn === me, gone = multi && (out || cnt(si) === 0);
+      badge = `<span class="badge ${mine ? "go" : ""}">${mine ? "Your turn" : gone ? "Out" : multi ? `${nm(g.turn)}'s turn` : "Their turn"}</span>`;
+      sub = `${esc(d?.name || "")} · round ${g.round} · ${multi ? `${S.length} players · you have ${cnt(si)}` : `${cnt(si)}–${cnt(1 - si)} cards`}`;
+    }
+    const av = g.status === "waiting" && !multi ? "?" : multi ? String(S.length) : initial(names[opp]);
+    const item = `<button type="button" class="game-item" data-g="${g.id}"><span class="avatar them${multi ? " group" : ""}">${av}</span><span class="gi-main"><b>${title}</b><small>${sub}</small></span>${badge}</button>`;
+    if (g.status !== "waiting") return `<li>${item}</li>`;
+    return host
       ? `<li class="gi-row">${item}<button type="button" class="gi-x" data-cancel="${g.id}" aria-label="Cancel this game">Cancel</button></li>`
-      : `<li>${item}</li>`;
+      : `<li class="gi-row">${item}<button type="button" class="gi-x" data-leave="${g.id}" aria-label="Leave this game">Leave</button></li>`;
   }).join("");
   $("games").querySelectorAll("[data-g]").forEach(b => b.onclick = () => openGame(b.dataset.g));
-  $("games").querySelectorAll("[data-cancel]").forEach(b => b.onclick = async () => {
-    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Sure?"; setTimeout(() => { b.classList.remove("sure"); b.textContent = "Cancel"; }, 3000); return; }
+  const sure = (b, label, fn) => b.onclick = async () => {
+    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Sure?"; setTimeout(() => { b.classList.remove("sure"); b.textContent = label; }, 3000); return; }
     b.disabled = true;
-    const { error } = await sb.rpc("cancel_game", { p_game: b.dataset.cancel });
-    if (error) { b.disabled = false; return toast(errMsg(error)); }
-    toast("Game cancelled"); renderGameList();
-  });
+    const err = await fn();
+    if (err) { b.disabled = false; return toast(errMsg(err)); }
+    renderGameList();
+  };
+  $("games").querySelectorAll("[data-cancel]").forEach(b => sure(b, "Cancel", async () => { const { error } = await sb.rpc("cancel_game", { p_game: b.dataset.cancel }); if (!error) toast("Game cancelled"); return error; }));
+  $("games").querySelectorAll("[data-leave]").forEach(b => sure(b, "Leave", async () => { const { error } = await sb.rpc("leave_lobby", { p_game: b.dataset.leave }); if (!error) toast("You left the game"); return error; }));
 }
 
 async function joinGame(code) {
@@ -1608,27 +1730,44 @@ async function refresh() {
   V = data;
   clockOffset = Date.parse(data.server_now) - Date.now();
   const g = V.game;
-  await loadNames([g.p1, g.p2]);
+  await loadNames(seats());
   if (!queue.length) {
     const seen = Number(store.get("sa-seen-" + id) || 0);
     const { data: rounds } = await sb.from("rounds").select("*").eq("game_id", id).gt("round", seen).order("round");
     if (id !== gameId) { refreshing = false; return; }
-    if (rounds && rounds.length) { queue = [rounds[rounds.length - 1]]; skipped = rounds.length - 1; }
+    if (rounds && rounds.length) { queue = [normRound(rounds[rounds.length - 1])]; skipped = rounds.length - 1; }
   }
   refreshing = false;
   render();
   if (refreshAgain) { refreshAgain = false; refresh(); }
 }
 
-const oppId = () => V.me === "p1" ? V.game.p2 : V.game.p1;
-const myCount = () => V.me === "p1" ? V.game.p1_count : V.game.p2_count;
-const theirCount = () => V.me === "p1" ? V.game.p2_count : V.game.p1_count;
+/* Seats: everyone in the game in turn order. 1v1 keeps the face-off layout; 3-6 players get the group table. */
+const seats = () => (V.game.players && V.game.players.length) ? V.game.players : [V.game.p1, V.game.p2].filter(Boolean);
+const mySeat = () => seats().indexOf(me);
+const countAt = i => { const g = V.game; return ((g.counts && g.counts.length) ? g.counts[i] : [g.p1_count, g.p2_count][i]) || 0; };
+const isMulti = () => seats().length > 2;
+const amOut = () => countAt(mySeat()) === 0 || (V.game.out_players || []).includes(me);
+const SEAT_COLORS = ["#5d6f96", "#2f8f83", "#9a5bc4", "#c0793a", "#c2457a", "#4a8bd6"];
+const seatColor = i => SEAT_COLORS[i % SEAT_COLORS.length];
+const oppId = () => seats().find(p => p !== me);
+const myCount = () => countAt(mySeat());
+const theirCount = () => countAt(seats().indexOf(oppId()));
+// rounds played before group games only carry c1/c2
+const normRound = r => r.cards ? r : { ...r, cards: [r.c1, r.c2], vals: [r.v1, r.v2], winner_seat: r.result === "p1" ? 0 : r.result === "p2" ? 1 : null };
+const nameOf = id => esc(names[id] || "Player");
+
+function topBar(d) {
+  return `<div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="top-actions"><span class="deck-label">${esc(d.name)} · ${timerLabel(V.game.timer_secs)} turns</span>${amOut() && V.game.status === "active" ? "" : `<button type="button" class="link danger" id="forfeitBtn">Forfeit</button>`}</span></div>`;
+}
+function wireTop() { $("leave").onclick = () => home(); if ($("forfeitBtn")) $("forfeitBtn").onclick = forfeit; }
 
 function shell(d) {
+  if (isMulti()) return shellMulti(d);
   const opp = names[oppId()] || "Friend";
   return `
   <section class="game view">
-    <div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="top-actions"><span class="deck-label">${esc(d.name)} · ${timerLabel(V.game.timer_secs)} turns</span><button type="button" class="link danger" id="forfeitBtn">Forfeit</button></span></div>
+    ${topBar(d)}
     <div class="scoreboard">
       <div class="players">
         <div class="player you" id="pYou"><span class="av-wrap"><span class="avatar">${ME}</span>${RING("ringYou")}</span><span class="pinfo"><b>You</b><span class="pcount"><span id="cYou">0</span> cards</span></span></div>
@@ -1639,6 +1778,24 @@ function shell(d) {
     </div>
     <div class="status" id="status" aria-live="polite"></div>
     <div class="table" id="table"></div>
+    <div class="actions" id="actions"></div>
+  </section>`;
+}
+function shellMulti(d) {
+  const chips = seats().map((id, i) => `
+      <div class="pchip${id === me ? " you" : ""}" id="pc${i}" style="--them:${seatColor(i)}">
+        <span class="av-wrap"><span class="avatar${id === me ? "" : " them"}">${id === me ? ME : initial(names[id])}</span>${RING("ring" + i)}</span>
+        <span class="pinfo"><b>${id === me ? "You" : nameOf(id)}</b><span class="pcount"><span id="cnt${i}">0</span> cards</span></span>
+      </div>`).join("");
+  return `
+  <section class="game view multi">
+    ${topBar(d)}
+    <div class="scoreboard">
+      <div class="pgrid n${seats().length}">${chips}</div>
+      <div class="round-row"><span>Round <b id="rnd">1</b></span><span class="pot" id="pot" hidden></span><span class="share-bar" aria-hidden="true">${seats().map((id, i) => `<i id="sh${i}" style="--c:${id === me ? "var(--accent)" : seatColor(i)}"></i>`).join("")}</span></div>
+    </div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="table multi" id="table"></div>
     <div class="actions" id="actions"></div>
   </section>`;
 }
@@ -1657,25 +1814,40 @@ function confirmBar(text, yesLabel, onYes, noLabel) {
   bar.querySelector("[data-no]").focus();
 }
 async function forfeit() {
-  const opp = names[oppId()] || "Your friend";
-  confirmBar(`Forfeit this game? ${esc(opp)} gets the win.`, "Forfeit", async () => {
+  const alive = seats().filter((id, i) => id !== me && countAt(i) > 0);
+  const text = alive.length > 1
+    ? "Forfeit this game? Your cards go in the pot and everyone else plays on."
+    : `Forfeit this game? ${esc(names[alive[0]] || "Your friend")} gets the win.`;
+  confirmBar(text, "Forfeit", async () => {
     const { error } = await sb.rpc("forfeit_game", { p_game: gameId });
-    if (!error) notifyOpponent(gameId);
     if (error) return toast(errMsg(error));
-    queue = []; renderedKey = ""; refresh();
+    notifyOpponent(gameId);
+    queue = []; renderedKey = ""; app.innerHTML = ""; refresh();
   }, "Keep playing");
 }
 function setStatus(kind, html, lead) {
   const el = $("status"); if (el) el.innerHTML = `<span class="pill ${kind}" id="pill">${lead || '<span class="dot"></span>'}<span>${html}</span></span>`;
 }
+const leadFor = id => `<span class="mini" style="--them:${seatColor(seats().indexOf(id))}">${initial(names[id])}</span>`;
+function bumpSet(id, v) { const el = $(id); if (el && el.textContent !== String(v)) { el.textContent = v; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); } }
 function updateBoard() {
   const g = V.game, d = DECKS[g.deck_key], total = d.cards.length;
-  const set = (id, v) => { const el = $(id); if (el && el.textContent !== String(v)) { el.textContent = v; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); } };
-  set("cYou", myCount()); set("cThem", theirCount());
-  if ($("tug")) $("tug").style.width = (myCount() / total * 100) + "%";
-  if ($("rnd")) $("rnd").textContent = queue.length ? queue[0].round : Math.min(g.round, 40);
-  const pot = $("pot"); if (pot) { pot.hidden = !g.pot_count; pot.textContent = `Pot ${g.pot_count}`; }
   const showTurn = !queue.length && g.status === "active";
+  if ($("rnd")) $("rnd").textContent = queue.length ? queue[0].round : g.round;
+  const pot = $("pot"); if (pot) { pot.hidden = !g.pot_count; pot.textContent = `Pot ${g.pot_count}`; }
+  if (isMulti()) {
+    const out = g.out_players || [];
+    seats().forEach((id, i) => {
+      bumpSet("cnt" + i, countAt(i));
+      const chip = $("pc" + i); if (!chip) return;
+      chip.classList.toggle("active", showTurn && g.turn === id);
+      chip.classList.toggle("out", g.status !== "waiting" && (countAt(i) === 0 || out.includes(id)));
+      const sh = $("sh" + i); if (sh) sh.style.flexGrow = countAt(i);
+    });
+    return;
+  }
+  bumpSet("cYou", myCount()); bumpSet("cThem", theirCount());
+  if ($("tug")) $("tug").style.width = (myCount() / total * 100) + "%";
   $("pYou")?.classList.toggle("active", showTurn && g.turn === me);
   $("pThem")?.classList.toggle("active", showTurn && g.turn !== me);
 }
@@ -1683,19 +1855,21 @@ function updateBoard() {
 function render() {
   if (!V) return;
   const g = V.game, d = DECKS[g.deck_key];
-  const key = queue.length ? `reveal|${queue[0].round}` : `${g.status}|${g.round}|${g.turn}|${g.rematch_id || ""}`;
+  const key = queue.length ? `reveal|${queue[0].round}` : `${g.status}|${g.round}|${g.turn}|${g.rematch_id || ""}|${seats().length}|${(g.out_players || []).length}`;
   if (key === renderedKey) { updateBoard(); return; }
   renderedKey = key;
-  const opp = names[oppId()] || "Your friend";
   document.title = g.status === "active" && g.turn === me && !queue.length ? "Your turn · StatAttack" : "StatAttack";
 
   if (g.status === "cancelled") { toast("That game was cancelled"); return home(); }
   if (g.status === "waiting") return renderInvite(g);
-  if (queue.length) return renderReveal(queue[0]);
-  if (g.status === "finished") return renderOver();
+  if (queue.length) return isMulti() ? renderRevealMulti(queue[0]) : renderReveal(queue[0]);
+  if (g.status === "finished") return isMulti() ? renderOverMulti() : renderOver();
 
-  if (!$("table")) { app.innerHTML = shell(d); $("leave").onclick = () => home(); $("forfeitBtn").onclick = forfeit; }
+  // the top bar changes once you're out, so rebuild the shell then
+  if (!$("table") || (!!$("forfeitBtn") === amOut())) { app.innerHTML = shell(d); wireTop(); }
+  if (isMulti()) return renderTurnMulti(d);
   updateBoard();
+  const opp = names[oppId()] || "Your friend";
   const yours = g.turn === me;
   $("table").className = "table";
   $("table").innerHTML = `
@@ -1708,6 +1882,36 @@ function render() {
     $("table").querySelectorAll("button.row").forEach(b => b.onclick = () => play(+b.dataset.i));
   } else {
     setStatus("wait", `<b>${esc(opp)}'s turn</b> <span class="sep">·</span> <span id="secsThem">picking a stat</span>`, `<span class="mini">${initial(opp)}</span>`);
+    $("sYou").querySelector(".stats")?.classList.add("waiting");
+  }
+  clock();
+}
+
+/* Group table: your card, plus everyone else's face-down card */
+const miniBack = thinking => `<div class="card-back mini-back${thinking ? " thinking" : ""}"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span></div>`;
+const outHTML = () => `<div class="card-back out-back"><div class="back-mark"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><span>You're out of cards.<br>Stay and watch how it ends.</span></div></div>`;
+function miniHTML(d, c, si) {
+  const pic = artFor(d, c), s = d.stats[si];
+  return `<article class="mini-card"><div class="art mart${pic ? " has-illus" : ""}" style="--h:${hueOf(d, c.id)}">${pic}<span class="mstamp">Wins</span></div><div class="mbody"><b>${esc(c.name)}</b><span class="mval">${fmt(c.v[si])}<small>${esc(s.unit)}</small></span></div></article>`;
+}
+function oppHTML(i, id, inner) {
+  return `<div class="opp${inner ? "" : " out"}" id="op${i}" style="--them:${seatColor(i)}"><div class="opp-card">${inner || `<div class="mini-out">Out</div>`}</div><span class="opp-name"><span class="avatar them sm">${initial(names[id])}</span><span>${nameOf(id)}</span></span></div>`;
+}
+function renderTurnMulti(d) {
+  const g = V.game, yours = g.turn === me, out = amOut(), turnName = names[g.turn] || "Player";
+  updateBoard();
+  $("table").className = "table multi";
+  $("table").innerHTML = `
+    <div class="slot you deal" id="sYou">${!out && V.my_top != null ? cardHTML(d, card(d, V.my_top), "you", yours) : outHTML()}</div>
+    <div class="opps n${seats().length - 1}" id="opps">${seats().map((id, i) => id === me ? "" : oppHTML(i, id, countAt(i) > 0 ? miniBack(g.turn === id) : "")).join("")}</div>`;
+  $("actions").innerHTML = "";
+  if (yours) {
+    setStatus("turn", `<b>Your turn</b> <span class="sep">·</span> pick a stat <span class="secs" id="secs"></span>`);
+    $("table").querySelectorAll("button.row").forEach(b => b.onclick = () => play(+b.dataset.i));
+  } else if (out) {
+    setStatus("wait", `<b>You're out</b> <span class="sep">·</span> ${esc(turnName)} is picking`, leadFor(g.turn));
+  } else {
+    setStatus("wait", `<b>${esc(turnName)}'s turn</b> <span class="sep">·</span> <span id="secsThem">picking a stat</span>`, leadFor(g.turn));
     $("sYou").querySelector(".stats")?.classList.add("waiting");
   }
   clock();
@@ -1727,13 +1931,29 @@ async function play(i) {
   refresh();
 }
 
+function nextButton(r, res, over, label) {
+  const g = V.game, thisRound = r.round;
+  $("actions").innerHTML = `${skipped ? `<span class="skipped">${skipped} earlier round${skipped > 1 ? "s" : ""} played while you were away</span>` : ""}<button type="button" class="btn primary" id="next">${over ? "See result" : label}${ARROW}</button>`;
+  $("next").focus({ preventScroll: true });
+  // live games keep moving: the reveal advances on its own after a few seconds
+  if (g.timer_secs <= 60) setTimeout(() => { if (queue.length && queue[0].round === thisRound) $("next")?.click(); }, reduceMotion ? 2500 : isMulti() ? 4600 : 3800);
+  $("next").onclick = async () => {
+    $("actions").innerHTML = "";
+    $("table").classList.add(res === "win" ? "to-you" : res === "lose" ? "to-them" : "to-pot");
+    store.set("sa-seen-" + gameId, String(Math.max(thisRound, Number(store.get("sa-seen-" + gameId) || 0))));
+    await wait(450);
+    queue = []; skipped = 0; renderedKey = "";
+    refresh();
+  };
+}
+
 async function renderReveal(r) {
   const g = V.game, d = DECKS[g.deck_key], s = d.stats[r.stat], opp = names[oppId()] || "Your friend";
-  const iAmP1 = V.me === "p1";
-  const mine = card(d, iAmP1 ? r.c1 : r.c2), theirs = card(d, iAmP1 ? r.c2 : r.c1);
-  const res = r.result === "draw" ? "draw" : (r.result === V.me ? "win" : "lose");
+  const my = mySeat(), ot = 1 - my;
+  const mine = card(d, r.cards[my]), theirs = card(d, r.cards[ot]);
+  const res = r.winner_seat == null ? "draw" : (r.winner_seat === my ? "win" : "lose");
   const byMe = r.by_player === me;
-  if (!$("table")) { app.innerHTML = shell(d); $("leave").onclick = () => home(); $("forfeitBtn").onclick = forfeit; }
+  if (!$("table")) { app.innerHTML = shell(d); wireTop(); }
   updateBoard();
   $("table").className = "table";
   $("table").innerHTML = `
@@ -1756,47 +1976,90 @@ async function renderReveal(r) {
   if (!queue.length || queue[0].round !== thisRound) return;
   const yRow = $("sYou").querySelector(`[data-i="${r.stat}"]`), tRow = $("sThem").querySelector(`.front [data-i="${r.stat}"]`);
   const yCard = $("sYou").querySelector(".card"), tCard = $("sThem").querySelector(".front .card");
-  const a = fmt(Number(iAmP1 ? r.v1 : r.v2)), b = fmt(Number(iAmP1 ? r.v2 : r.v1)), sep = `<span class="sep">·</span>`;
+  const a = fmt(Number(r.vals[my])), b = fmt(Number(r.vals[ot])), sep = `<span class="sep">·</span>`;
   if (res === "draw") { yRow.classList.add("draw"); tRow.classList.add("draw"); setStatus("draw", `<b>${esc(s.label)}</b> tied at ${a} ${sep} Both cards go in the pot`); }
   else {
     yRow.classList.add(res); tRow.classList.add(res === "win" ? "lose" : "win");
     (res === "win" ? yCard : tCard).classList.add("stamped"); (res === "win" ? tCard : yCard).classList.add("dim");
     setStatus(res, res === "win" ? `<b>${esc(s.label)}</b> ${a} v ${b} ${sep} You take ${esc(theirs.name)}` : `<b>${esc(s.label)}</b> ${a} v ${b} ${sep} ${esc(opp)} takes ${esc(mine.name)}`);
   }
-  const over = V.game.status === "finished" && thisRound >= V.game.round - 1;
-  const nextLabel = over ? "See result" : res === "win" || (res === "draw" && byMe) ? "Next round · you pick" : `Next round · ${esc(opp)} picks`;
-  $("actions").innerHTML = `${skipped ? `<span class="skipped">${skipped} earlier round${skipped > 1 ? "s" : ""} played while you were away</span>` : ""}<button type="button" class="btn primary" id="next">${nextLabel}${ARROW}</button>`;
-  $("next").focus({ preventScroll: true });
-  // live games keep moving: the reveal advances on its own after a few seconds
-  if (g.timer_secs <= 60) setTimeout(() => { if (queue.length && queue[0].round === thisRound) $("next")?.click(); }, reduceMotion ? 2500 : 3800);
-  $("next").onclick = async () => {
-    $("actions").innerHTML = "";
-    $("table").classList.add(res === "win" ? "to-you" : res === "lose" ? "to-them" : "to-pot");
-    store.set("sa-seen-" + gameId, String(Math.max(thisRound, Number(store.get("sa-seen-" + gameId) || 0))));
-    await wait(450);
-    queue = []; skipped = 0; renderedKey = "";
-    refresh();
-  };
+  const over = g.status === "finished" && thisRound >= g.round - 1;
+  nextButton(r, res, over, res === "win" || (res === "draw" && byMe) ? "Next round · you pick" : `Next round · ${esc(opp)} picks`);
+}
+
+async function renderRevealMulti(r) {
+  const g = V.game, d = DECKS[g.deck_key], s = d.stats[r.stat], S = seats(), my = mySeat();
+  const w = r.winner_seat, byMe = r.by_player === me, byName = names[r.by_player] || "Player";
+  if (!$("table") || !$("pc0")) { app.innerHTML = shell(d); wireTop(); }
+  updateBoard();
+  const vals = r.vals.map(v => v == null ? null : Number(v));
+  const played = vals.filter(v => v != null);
+  const best = s.low ? Math.min(...played) : Math.max(...played);
+  const myCard = r.cards[my] != null ? card(d, r.cards[my]) : null;
+  $("table").className = "table multi";
+  $("table").innerHTML = `
+    <div class="slot you deal" id="sYou">${myCard ? cardHTML(d, myCard, "you", false) : outHTML()}</div>
+    <div class="opps n${S.length - 1}" id="opps">${S.map((id, i) => id === me ? "" : oppHTML(i, id, r.cards[i] == null ? "" :
+      `<div class="flipper"><div class="face back">${miniBack(false)}</div><div class="face front">${miniHTML(d, card(d, r.cards[i]), r.stat)}</div></div>`)).join("")}</div>`;
+  $("actions").innerHTML = "";
+  if (myCard) { const st = $("sYou").querySelector(".stats"); st.querySelector(`[data-i="${r.stat}"]`).classList.add("picked"); st.classList.add("decided"); }
+  if (r.auto) setStatus("hurry", `<b>Time's up</b> <span class="sep">·</span> ${esc(s.label)} was played for ${byMe ? "you" : esc(byName)}`);
+  else if (byMe) setStatus("wait", `You played <b>${esc(s.label)}</b>`);
+  else setStatus("wait", `${esc(byName)} picked <b>${esc(s.label)}</b>`, leadFor(r.by_player));
+  const thisRound = r.round, stale = () => !queue.length || queue[0].round !== thisRound;
+  await wait(byMe ? 250 : 650);
+  if (stale()) return;
+  const flips = [...$("opps").querySelectorAll(".opp:not(.out) .opp-card")];
+  flips.forEach((el, k) => setTimeout(() => el.classList.add("flipped"), reduceMotion ? 0 : k * 140));
+  await wait(800 + flips.length * 140);
+  if (stale()) return;
+  S.forEach((id, i) => {
+    if (vals[i] == null) return;
+    const kind = w == null ? (vals[i] === best ? "draw" : "lose") : (i === w ? "win" : "lose");
+    if (id !== me) { $("op" + i)?.classList.add(kind); return; }
+    $("sYou").querySelector(`[data-i="${r.stat}"]`)?.classList.add(kind);
+    const el = $("sYou").querySelector(".card");
+    if (kind === "win") el?.classList.add("stamped"); else if (kind === "lose") el?.classList.add("dim");
+  });
+  const sep = `<span class="sep">·</span>`, val = `${fmt(best)}${s.unit ? " " + esc(s.unit) : ""}`;
+  let res;
+  if (w == null) { res = "draw"; setStatus("draw", `<b>${esc(s.label)}</b> tied at ${val} ${sep} Cards go in the pot`); }
+  else if (S[w] === me) { res = "win"; setStatus("win", `<b>${esc(s.label)}</b> ${val} ${sep} You take ${played.length} cards`); }
+  else { res = "lose"; setStatus(myCard ? "lose" : "wait", `<b>${nameOf(S[w])}</b> takes ${played.length} with ${esc(card(d, r.cards[w]).name)} ${sep} ${val}`, myCard ? "" : leadFor(S[w])); }
+  const over = g.status === "finished" && thisRound >= g.round - 1;
+  const nextId = g.status === "active" ? g.turn : null;
+  nextButton(r, res, over, nextId === me ? "Next round · you pick" : nextId ? `Next round · ${nameOf(nextId)} picks` : "Next round");
 }
 
 function inviteText(g) {
-  const who = myName || "Your mate", d = DECKS[g.deck_key];
-  return `${who} has challenged you to StatAttack${d ? ` (${d.name})` : ""}. Pick a stat, beat your mate, take the card. Join with code ${g.code}:`;
+  const who = myName || "Your mate", d = DECKS[g.deck_key], n = g.max_players || 2;
+  return n > 2
+    ? `${who} wants you in a ${n}-player game of StatAttack${d ? ` (${d.name})` : ""}. Pick a stat, beat your mates, take the cards. Join with code ${g.code}:`
+    : `${who} has challenged you to StatAttack${d ? ` (${d.name})` : ""}. Pick a stat, beat your mate, take the card. Join with code ${g.code}:`;
 }
 function renderInvite(g) {
   const link = location.origin + location.pathname + "#" + g.code;
+  const S = seats(), multi = (g.max_players || 2) > 2, host = S[0], amHost = host === me;
+  const lobby = multi ? `<div class="lobby">${Array.from({ length: g.max_players }, (_, i) => S[i]
+      ? `<span class="lseat${S[i] === me ? " you" : ""}" style="--them:${seatColor(i)}"><span class="avatar${S[i] === me ? "" : " them"} sm">${S[i] === me ? ME : initial(names[S[i]])}</span><span>${S[i] === me ? "You" : nameOf(S[i])}</span>${i === 0 ? `<em>host</em>` : ""}</span>`
+      : `<span class="lseat empty"><span class="avatar sm"></span><span>Open seat</span></span>`).join("")}</div>` : "";
+  const waitLine = !multi ? "Waiting for them to join"
+    : amHost ? `${S.length} of ${g.max_players} in${S.length >= 2 ? ". Start now or wait for a full table" : ""}`
+    : `${S.length} of ${g.max_players} in. Waiting for ${nameOf(host)} to start`;
   app.innerHTML = `
   <section class="home view">
-    <div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="deck-label">${esc(DECKS[g.deck_key].name)} · ${timerLabel(g.timer_secs)} turns</span></div>
+    <div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="deck-label">${esc(DECKS[g.deck_key].name)} · ${multi ? `${g.max_players} players · ` : ""}${timerLabel(g.timer_secs)} turns</span></div>
     <div class="panel invite">
-      <p class="eyebrow">Invite a friend</p>
+      <p class="eyebrow">${multi ? (amHost ? "Invite your friends" : "You're in") : "Invite a friend"}</p>
       <div class="code" aria-label="Game code">${esc(g.code)}</div>
-      <p>Send them the link, or they can type the code on the StatAttack home screen.</p>
+      <p>${multi && !amHost ? `Know someone else who wants in? Send them the link. ${nameOf(host)} can start any time, or it starts by itself when every seat is taken.` : multi ? `Send the link to up to ${g.max_players - 1} friends, or they can type the code on the StatAttack home screen. It starts by itself when every seat is taken.` : "Send them the link, or they can type the code on the StatAttack home screen."}</p>
       <span class="link" id="inviteLink">${esc(link)}</span>
-      <div class="actions"><button type="button" class="btn primary" id="share">${navigator.share ? "Share invite" : "Copy invite link"}${ARROW}</button><a class="btn ghost" id="waShare" href="https://wa.me/?text=${encodeURIComponent(inviteText(g) + " " + link)}" target="_blank" rel="noopener">WhatsApp</a></div>
-      <span class="waiting-dots">Waiting for them to join<span class="dots"><i></i><i></i><i></i></span></span>
+      <div class="actions"><button type="button" class="btn ${multi && amHost && S.length >= 2 ? "ghost" : "primary"}" id="share">${navigator.share ? "Share invite" : "Copy invite link"}${ARROW}</button><a class="btn ghost" id="waShare" href="https://wa.me/?text=${encodeURIComponent(inviteText(g) + " " + link)}" target="_blank" rel="noopener">WhatsApp</a></div>
+      ${lobby}
+      <span class="waiting-dots">${waitLine}<span class="dots"><i></i><i></i><i></i></span></span>
+      ${multi && amHost && S.length >= 2 ? `<button type="button" class="btn primary" id="startNow">Start with ${S.length} players${ARROW}</button>` : ""}
       <div class="setting-row" id="inviteAlerts" hidden></div>
-      ${g.p1 === me ? `<button type="button" class="link danger" id="cancelGame">Cancel this game</button>` : ""}
+      ${amHost ? `<button type="button" class="link danger" id="cancelGame">Cancel this game</button>` : `<button type="button" class="link danger" id="leaveLobby">Leave this game</button>`}
     </div>
   </section>`;
   $("leave").onclick = () => home();
@@ -1805,6 +2068,17 @@ function renderInvite(g) {
     if (error) return toast(errMsg(error));
     toast("Game cancelled"); home();
   }, "Keep it");
+  if ($("leaveLobby")) $("leaveLobby").onclick = () => confirmBar("Leave this game? You can rejoin with the code until it starts.", "Leave", async () => {
+    const { error } = await sb.rpc("leave_lobby", { p_game: g.id });
+    if (error) return toast(errMsg(error));
+    toast("You left the game"); home();
+  }, "Stay");
+  if ($("startNow")) $("startNow").onclick = async () => {
+    const b = $("startNow"); b.disabled = true;
+    const { error } = await sb.rpc("start_now", { p_game: g.id });
+    if (error) { b.disabled = false; return toast(errMsg(error)); }
+    notifyOpponent(g.id); renderedKey = ""; refresh();
+  };
   $("share").onclick = async () => {
     const text = inviteText(g);
     if (navigator.share) { try { await navigator.share({ title: "StatAttack", text, url: link }); } catch (e) {} return; }
@@ -1814,11 +2088,25 @@ function renderInvite(g) {
   alertsState().then(st => {
     const box = $("inviteAlerts"); if (!box || st !== "off") return;
     box.hidden = false;
-    box.innerHTML = `<span class="setting-icon">${BELL}</span><div class="setting-text"><b>Get an alert when they join</b><span>And whenever it's your turn.</span></div><button type="button" class="btn primary small" id="inviteAlertsOn">Turn on</button>`;
+    box.innerHTML = `<span class="setting-icon">${BELL}</span><div class="setting-text"><b>${amHost ? (multi ? "Get an alert when friends join" : "Get an alert when they join") : "Get an alert when it starts"}</b><span>And whenever it's your turn.</span></div><button type="button" class="btn primary small" id="inviteAlertsOn">Turn on</button>`;
     $("inviteAlertsOn").onclick = async () => { if (await enableAlerts()) box.hidden = true; };
   });
 }
 
+function rematchButtons(g) {
+  const left = (g.out_players || []).includes(me) && isMulti();
+  return `${g.rematch_id ? (left ? "" : `<button type="button" class="btn primary" id="toRematch">Play the rematch${ARROW}</button>`) : `<button type="button" class="btn primary" id="rematch">Rematch${ARROW}</button>`}<button type="button" class="btn ghost" id="home2">Home</button>`;
+}
+function wireOver(g) {
+  $("leave").onclick = $("home2").onclick = () => home();
+  if ($("toRematch")) $("toRematch").onclick = () => openGame(g.rematch_id);
+  if ($("rematch")) $("rematch").onclick = async () => {
+    const { data, error } = await sb.rpc("rematch", { p_game: g.id });
+    if (error) return toast(errMsg(error));
+    notifyOpponent(data.game.id);
+    openGame(data.game.id);
+  };
+}
 function renderOver() {
   const g = V.game, d = DECKS[g.deck_key], opp = names[oppId()] || "Your friend", total = d.cards.length;
   const y = myCount(), o = theirCount(), won = g.winner === me, tie = !g.winner;
@@ -1830,17 +2118,33 @@ function renderOver() {
       <h1>${won ? "You win" : tie ? "All square" : `${esc(opp)} wins`}</h1>
       <div class="final"><div><span class="avatar">${ME}</span><b>${y}</b></div><span class="dash">–</span><div><b>${o}</b><span class="avatar them">${initial(opp)}</span></div></div>
       <div class="tug" aria-hidden="true"><i style="width:${y / total * 100}%"></i></div>
-      <div class="actions">${g.rematch_id ? `<button type="button" class="btn primary" id="toRematch">Play the rematch${ARROW}</button>` : `<button type="button" class="btn primary" id="rematch">Rematch${ARROW}</button>`}<button type="button" class="btn ghost" id="home2">Home</button></div>
+      <div class="actions">${rematchButtons(g)}</div>
     </div>
   </section>`;
-  $("leave").onclick = $("home2").onclick = () => home();
-  if ($("toRematch")) $("toRematch").onclick = () => openGame(g.rematch_id);
-  if ($("rematch")) $("rematch").onclick = async () => {
-    const { data, error } = await sb.rpc("rematch", { p_game: g.id });
-    if (error) return toast(errMsg(error));
-    notifyOpponent(data.game.id);
-    openGame(data.game.id);
-  };
+  wireOver(g);
+}
+function renderOverMulti() {
+  const g = V.game, d = DECKS[g.deck_key], S = seats(), total = d.cards.length, won = g.winner === me, tie = !g.winner;
+  const left = g.out_players || [];
+  const order = S.map((id, i) => ({ id, i, n: countAt(i), gone: left.includes(id) }))
+    .sort((a, b) => (b.id === g.winner) - (a.id === g.winner) || b.n - a.n || a.gone - b.gone || a.i - b.i);
+  const glow = won ? "var(--accent)" : tie ? "var(--draw)" : seatColor(S.indexOf(g.winner));
+  app.innerHTML = `
+  <section class="over view">
+    <div class="game-top"><button type="button" class="link" id="leave">${BACK}Games</button><span class="deck-label">${esc(d.name)}</span></div>
+    <div class="result" style="--glow:${glow}">
+      <p class="eyebrow">${esc(d.name)} · ${S.length} players · ${g.round - 1} rounds</p>
+      <h1>${won ? "You win" : tie ? "All square" : `${nameOf(g.winner)} wins`}</h1>
+      <ol class="ranks">${order.map((p, k) => `
+        <li class="rank${p.id === me ? " you" : ""}${p.id === g.winner ? " top" : ""}" style="--them:${seatColor(p.i)};--d:${k * 70}ms">
+          <span class="pos">${k + 1}</span><span class="avatar${p.id === me ? "" : " them"} sm">${p.id === me ? ME : initial(names[p.id])}</span>
+          <span class="rname">${p.id === me ? "You" : nameOf(p.id)}${p.gone ? ` <em>forfeited</em>` : ""}</span>
+          <span class="rbar" aria-hidden="true"><i style="width:${p.n / total * 100}%"></i></span><b>${p.n}</b>
+        </li>`).join("")}</ol>
+      <div class="actions">${rematchButtons(g)}</div>
+    </div>
+  </section>`;
+  wireOver(g);
 }
 
 /* Turn clock: drains the active player's ring; whoever is waiting claims the timeout when it runs out. */
@@ -1854,7 +2158,7 @@ function clock() {
   if (!V || queue.length || V.game.status !== "active" || !V.game.turn_deadline) return;
   const g = V.game, left = Date.parse(g.turn_deadline) - (Date.now() + clockOffset), dur = g.timer_secs * 1000;
   const frac = Math.max(0, Math.min(1, left / dur)), urgent = left <= 5000 && g.timer_secs <= 60;
-  const ring = $(g.turn === me ? "ringYou" : "ringThem");
+  const ring = isMulti() ? $("ring" + seats().indexOf(g.turn)) : $(g.turn === me ? "ringYou" : "ringThem");
   if (ring) { ring.querySelector(".fg").style.strokeDashoffset = (100 * (1 - frac)).toFixed(2); ring.classList.toggle("urgent", urgent); }
   const secs = $("secs"); if (secs) secs.textContent = fmtLeft(left);
   const st = $("secsThem"); if (st) st.textContent = g.timer_secs > 60 ? `${fmtLeft(left)} to play` : "picking a stat";
