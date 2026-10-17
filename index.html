@@ -130,6 +130,24 @@ button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent
 .btn:hover svg { transform: translateX(2px); }
 .eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 
+/* Home landing */
+.hello { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 0; color: var(--muted); font-size: 14px; }
+.hello:empty { display: none; }
+.hello b { color: var(--ink); font-weight: 600; }
+.landing { display: grid; gap: 12px; padding: 6px 0 4px; }
+.landing h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(30px, 8vw, 44px); letter-spacing: -.035em; line-height: 1.02; text-wrap: balance; }
+.landing h1 span { color: var(--accent); }
+.landing .lede { margin: 0 0 6px; color: var(--muted); font-size: 15.5px; max-width: 46ch; }
+.land-map { padding: 18px; gap: 14px; }
+.land-map b { font-size: 17px; }
+.land-map .ab-ic { width: 48px; height: 48px; }
+.land-map > svg { width: 20px; height: 20px; margin-left: auto; flex: none; }
+.land-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.land-two .add-big { flex-direction: column; align-items: flex-start; gap: 10px; }
+.land-blank { justify-self: center; font-size: 14px; color: var(--muted); }
+.play-panel .panel-head .section-title { margin: 0; }
+.join-row { display: grid; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
+
 /* ---------- Card ---------- */
 .card {
   background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
@@ -1648,6 +1666,7 @@ async function renderGroupList() {
   const { data: mem } = await sb.from("draft_members").select("draft_id").eq("user_id", me).eq("active", true);
   const ids = (mem || []).map(m => m.draft_id);
   if (!ids.length || !$("groupList")) { if ($("groupList")) $("groupList").innerHTML = ""; return; }
+  if ($("myDecks")) $("myDecks").hidden = false;
   const [{ data: drafts }, { data: cards }, { data: members }] = await Promise.all([
     sb.from("drafts").select("*").in("id", ids).eq("status", "open").order("updated_at", { ascending: false }),
     sb.from("draft_cards").select("id, draft_id").in("draft_id", ids).eq("removed", false),
@@ -2654,24 +2673,36 @@ async function home(pendingCode) {
     wireInstall();
     return;
   }
-  const deckTiles = playableDecks().map(d => `
+  const deckTiles = playableDecks().sort((a, b) => (b.custom ? 1 : 0) - (a.custom ? 1 : 0)).map(d => `
     <button type="button" class="tile" data-deck="${d.key}">
       ${(() => { const sample = card(d, d.key === "cars" ? 12 : 0), pic = d.custom && !sample.image && !sample.place ? "" : artFor(d, sample); return `<span class="art${pic ? " has-illus" : ""}" style="--h:${hueOf(d, sample.id)}">${pic}<span class="num" aria-hidden="true">${d.cards.length}</span></span>`; })()}
       <span class="tile-body"><b>${esc(d.name)}</b><span class="stat-list">${d.custom ? (d.group ? "Group · " : "Yours · ") : ""}${d.cards.length} cards</span></span>
     </button>`).join("");
   app.innerHTML = `
   <section class="home view">
-    <div class="greeting"><h1>${myName ? `Hi ${esc(myName)}. <span>Who are you taking on?</span>` : `Pick a stat. Beat your mate. <span>Take the card.</span>`}</h1></div>
-    <div id="installSlot">${installHTML()}</div>
-    ${pendingCode ? `<div class="panel"><h2>You've been invited</h2><p>${deckInvite ? "Add your name so everyone knows who's rating, then join the group deck." : `Add your name so your friend knows who they're playing, then join game <b>${esc(pendingCode)}</b>.`}</p></div>` : ""}
-    <div class="panel">
+    ${pendingCode ? `<div class="greeting"><h1>You've been invited. <span>Jump in.</span></h1></div>
+    <div class="panel"><p>${deckInvite ? "Add your name so everyone knows who's rating, then join the group deck." : `Add your name so your friend knows who they're playing, then join game <b>${esc(pendingCode)}</b>.`}</p>` : `
+    <div class="hello">${myName ? `<span>Hi <b>${esc(myName)}</b></span><button type="button" class="link" id="editName">Change name</button>` : ""}</div>
+    <div class="panel name-panel" id="namePanel" ${myName ? "hidden" : ""}>`}
       <label class="section-title" for="name">Your name</label>
       <div class="row-form"><div class="field"><span class="avatar" id="nameAv">${ME}</span><input id="name" maxlength="20" autocomplete="nickname" value="${esc(myName)}" placeholder="What your friends call you"></div>
       ${pendingCode ? `<button type="button" class="btn primary small" id="joinPending">${deckInvite ? "Join" : "Join game"}${ARROW}</button>` : `<button type="button" class="btn ghost small" id="saveName">Save</button>`}</div>
     </div>
     ${pendingCode ? "" : `
-    <div class="panel">
-      <h2>Start a game</h2>
+    <div class="panel games-panel" id="gamesPanel" hidden><h2>Your games</h2><ul class="games-list" id="games"></ul></div>
+    <div class="landing">
+      <h1>Make a deck of <span>your world.</span></h1>
+      <p class="lede">Your local pubs, your group chat, your five-a-side. Turn them into cards, rate them, then battle your mates stat for stat.</p>
+      <button type="button" class="add-big hero wide land-map" id="mapDeck"><span class="ab-ic">${MAP_PIN}</span><span class="ab-t"><b>Build from the map</b><small>Search "pubs in Brixton" and pick the places. Photos included.</small></span>${ARROW}</button>
+      <div class="land-two">
+        <button type="button" class="add-big" id="photoDeck"><span class="ab-ic">${CAMERA}</span><span class="ab-t"><b>From a group photo</b><small>One card per face</small></span></button>
+        <button type="button" class="add-big" id="newGroup"><span class="ab-ic">${GROUP_ICON}</span><span class="ab-t"><b>Make it with friends</b><small>Everyone adds cards and rates</small></span></button>
+      </div>
+      <button type="button" class="link land-blank" id="newDeck">Or start from a blank deck</button>
+    </div>
+    ${myDecksPanel()}
+    <div class="panel play-panel">
+      <div class="panel-head"><h2>Play</h2><span class="section-title">Pick a deck to start</span></div>
       <div class="setup-row">
         <div class="setup"><span class="section-title" id="playersLbl">Players</span>
           <div class="seg" role="radiogroup" aria-labelledby="playersLbl">${[2, 3, 4, 5, 6].map(n => `<input type="radio" name="players" id="players${n}" value="${n}" ${n === playerCount ? "checked" : ""}><label for="players${n}">${n}</label>`).join("")}</div>
@@ -2682,19 +2713,17 @@ async function home(pendingCode) {
       </div>
       <div class="decks">${deckTiles}</div>
       <p class="note" id="setupNote">${setupNote(playerCount)}</p>
+      <div class="join-row"><span class="section-title">Got a code from a friend?</span>
+        <div class="row-form"><div class="field"><input id="joinCode" class="code-input" maxlength="6" autocomplete="off" spellcheck="false" placeholder="ABC123" aria-label="Game code"></div><button type="button" class="btn ghost small" id="joinBtn">Join${ARROW}</button></div>
+      </div>
     </div>
-    ${myDecksPanel()}
-    ${accountHTML()}
-    <div class="panel">
-      <h2>Join a game</h2>
-      <div class="row-form"><div class="field"><input id="joinCode" class="code-input" maxlength="6" autocomplete="off" spellcheck="false" placeholder="ABC123" aria-label="Game code"></div><button type="button" class="btn primary small" id="joinBtn">Join${ARROW}</button></div>
-    </div>
-    <div class="panel"><h2>Your games</h2><ul class="games-list" id="games"><li class="empty">Loading…</li></ul></div>`}
+    <div id="installSlot">${installHTML()}</div>
+    ${accountHTML()}`}
   </section>`;
   const nameIn = $("name");
   const needName = async () => {
     if (nameIn.value.trim() === myName && myName) return true;
-    if (!nameIn.value.trim()) { toast("Add your name first"); nameIn.focus(); return false; }
+    if (!nameIn.value.trim()) { toast("Add your name first"); if ($("namePanel")) $("namePanel").hidden = false; nameIn.scrollIntoView({ block: "center" }); nameIn.focus(); return false; }
     return saveName(nameIn.value);
   };
   wirePractice();
@@ -2702,7 +2731,8 @@ async function home(pendingCode) {
   wireInstall();
   if ($("acct")) wireAccount();
   if (pendingCode) { $("joinPending").onclick = async () => { if (await needName()) deckInvite ? joinDraftCode(pendingCode.slice(5)) : joinGame(pendingCode); }; return; }
-  $("saveName").onclick = async () => { if (await needName()) toast("Name saved"); };
+  $("saveName").onclick = async () => { if (await needName()) home(); };
+  if ($("editName")) $("editName").onclick = () => { $("namePanel").hidden = false; nameIn.focus(); nameIn.select(); };
   app.querySelectorAll("[data-deck]").forEach(b => b.onclick = async () => {
     if (busy || !(await needName())) return;
     const t = app.querySelector('input[name="timer"]:checked'); timerSecs = t ? +t.value : 30; store.set("sa-timer", timerSecs);
@@ -2727,7 +2757,8 @@ async function renderGameList() {
   const list = $("games"); if (!list) return;
   const { data, error } = await sb.from("games").select("*").neq("status", "cancelled").order("updated_at", { ascending: false }).limit(25);
   if (error) { list.innerHTML = `<li class="empty">${esc(errMsg(error))}</li>`; return; }
-  if (!data.length) { list.innerHTML = `<li class="empty">No games yet. Start one above and send your friends the link.</li>`; return; }
+  if ($("gamesPanel")) $("gamesPanel").hidden = !data.length;
+  if (!data.length) { list.innerHTML = ""; return; }
   const seatsOf = g => (g.players && g.players.length) ? g.players : [g.p1, g.p2].filter(Boolean);
   await loadNames(data.flatMap(seatsOf));
   if (data.some(g => !DECKS[g.deck_key])) { try { await loadDecks(); } catch (e) {} }
@@ -2794,23 +2825,22 @@ const myDecks = () => Object.values(DECKS).filter(d => d.owner && d.owner === me
 function myDecksPanel() {
   const mine = myDecks();
   return `
-    <div class="panel" id="myDecks">
-      <div class="panel-head"><h2>Your decks</h2><span class="head-btns"><button type="button" class="btn ghost small" id="newGroup">${GROUP_ICON}Make one with friends</button><button type="button" class="btn primary small" id="newDeck">${PLUS}Create a deck</button></span></div>
-      <button type="button" class="add-big hero wide" id="mapDeck"><span class="ab-ic">${MAP_PIN}</span><span class="ab-t"><b>Build a deck from the map</b><small>Search "pubs in Brixton" or "gyms in Leeds" and pick the places, photos included</small></span></button>
+    <div class="panel" id="myDecks" ${mine.length ? "" : "hidden"}>
+      <h2>Your decks</h2>
       <ul class="games-list" id="groupList"></ul>
       ${mine.length ? `<ul class="games-list">${mine.map(d => `
         <li class="gi-row"><button type="button" class="game-item" data-edit="${d.key}">
           <span class="avatar deck-dot" style="--h:${d.hues[0]}">${esc((d.name.trim()[0] || "?").toUpperCase())}</span>
           <span class="gi-main"><b>${esc(d.name)}</b><small>${d.cards.length} cards · ${d.stats.map(s => esc(s.label)).join(", ")}</small></span>
           <span class="badge">Edit</span></button>
-          <button type="button" class="gi-x" data-remove="${d.key}" aria-label="Remove ${esc(d.name)}">Remove</button></li>`).join("")}</ul>`
-      : `<p>Make a deck about anything: your mates, your local pubs, the family dog. Or make one <b>with friends</b>: everyone adds cards and rates them together.</p>`}
+          <button type="button" class="gi-x" data-remove="${d.key}" aria-label="Remove ${esc(d.name)}">Remove</button></li>`).join("")}</ul>` : ""}
     </div>`;
 }
 function wireMyDecks() {
   const nb = $("newDeck"); if (nb) nb.onclick = () => openEditor(null);
   const ng = $("newGroup"); if (ng) ng.onclick = () => openGroupSetup(null);
   const md = $("mapDeck"); if (md) md.onclick = () => { openEditor(null); openPlaces(editorPlacesTarget()); };
+  const pd = $("photoDeck"); if (pd) pd.onclick = () => { openEditor(null); const f = $("edSpFile"); if (f) { f.value = ""; f.click(); } };
   renderGroupList();
   app.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => openEditor(b.dataset.edit));
   app.querySelectorAll("[data-remove]").forEach(b => b.onclick = async () => {
