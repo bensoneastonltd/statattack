@@ -816,6 +816,25 @@ a.btn.ghost { color: var(--ink); }
 .ptr svg { width: 18px; height: 18px; }
 .ptr.ready { color: var(--accent); }
 .ptr.spinning svg { animation: spin .8s linear infinite; color: var(--accent); }
+
+/* Map search */
+.places .row-form { margin: 0; }
+.pl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-btn { border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: border-color .2s, background .2s; }
+.chip-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.pl-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.pl-head b { font-size: 15px; }
+.pl-head span { font-size: 12.5px; color: var(--muted); flex: 1; }
+.pl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 360px; overflow-y: auto; overscroll-behavior: contain; border-radius: 12px; }
+.pl-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; padding: 9px 10px; border-radius: 12px; background: var(--surface-2); cursor: pointer; border: 1px solid transparent; transition: border-color .15s, background .15s; }
+.pl-row.on { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+.pl-row input { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
+.pl-main { display: grid; min-width: 0; line-height: 1.3; }
+.pl-main b { font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-main small { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.places .fine a { color: inherit; }
+.places .actions { justify-content: flex-start; min-height: 0; }
+.head-btns .btn svg { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
@@ -1082,6 +1101,204 @@ function carSVG(name, idx) {
   </svg>`;
 }
 
+
+/* ---------- More ready-made decks: Solar System, Flags of the World, Dinosaurs (art drawn in code) ---------- */
+const NEW_DECKS = {
+  space: { key: "space", name: "Solar System", blurb: "Planets, dwarf planets and moons. Hotter, bigger and further all win.", hues: [232, 268], sort: 3,
+    stats: [{ label: "Diameter", unit: "km" }, { label: "Gravity", unit: "m/s²" }, { label: "Spin time", unit: "hrs" }, { label: "Temperature", unit: "°C" }, { label: "From the Sun", unit: "m km" }],
+    cards: [["Mercury", 4879, 3.7, 1408, 167, 58], ["Venus", 12104, 8.9, 5832, 464, 108], ["Earth", 12742, 9.8, 24, 15, 150], ["Mars", 6779, 3.7, 24.6, -65, 228],
+      ["Jupiter", 139820, 24.8, 9.9, -110, 778], ["Saturn", 116460, 10.4, 10.7, -140, 1433], ["Uranus", 50724, 8.9, 17.2, -195, 2871], ["Neptune", 49244, 11.2, 16.1, -200, 4495],
+      ["Pluto", 2377, 0.6, 153.3, -225, 5906], ["Ceres", 940, 0.3, 9.1, -105, 414], ["Eris", 2326, 0.8, 379, -231, 10125], ["The Moon", 3475, 1.6, 655.7, -20, 150],
+      ["Io", 3643, 1.8, 42.5, -143, 778], ["Europa", 3122, 1.3, 85.2, -160, 778], ["Ganymede", 5268, 1.4, 171.7, -163, 778], ["Titan", 5150, 1.4, 382.7, -179, 1433]] },
+  flags: { key: "flags", name: "Flags of the World", blurb: "Sixteen countries, rough 2024 figures.", hues: [196, 150], sort: 4,
+    stats: [{ label: "Population", unit: "m" }, { label: "Area", unit: "k km²" }, { label: "Highest point", unit: "m" }, { label: "Life expectancy", unit: "yrs" }, { label: "Coastline", unit: "km" }],
+    cards: [["Japan", 124, 378, 3776, 84.5, 29751], ["France", 68.4, 552, 4806, 83, 4853], ["Italy", 59, 301, 4748, 83.5, 7600], ["Germany", 84.5, 357, 2962, 81, 2389],
+      ["Ireland", 5.3, 70, 1039, 82.5, 1448], ["Netherlands", 18, 42, 322, 82, 451], ["Sweden", 10.6, 450, 2097, 83, 3218], ["Norway", 5.6, 324, 2469, 83.5, 25148],
+      ["Brazil", 212, 8516, 2995, 76, 7491], ["India", 1440, 3287, 8586, 72, 7000], ["United Kingdom", 68.3, 244, 1345, 81, 12429], ["United States", 335, 9834, 6190, 78.5, 19924],
+      ["Jamaica", 2.8, 11, 2256, 71, 1022], ["Greece", 10.4, 132, 2918, 81, 13676], ["China", 1410, 9597, 8849, 78, 14500], ["Mexico", 130, 1964, 5636, 75, 9330]] },
+  dinos: { key: "dinos", name: "Dinosaurs", blurb: "Best estimates from the fossils. Older beats younger.", hues: [96, 40], sort: 5,
+    stats: [{ label: "Length", unit: "m" }, { label: "Weight", unit: "kg" }, { label: "Top speed", unit: "km/h" }, { label: "Lived", unit: "m yrs ago" }],
+    cards: [["Tyrannosaurus", 12.3, 8400, 27, 67], ["Spinosaurus", 15, 7400, 24, 97], ["Giganotosaurus", 12.5, 7000, 40, 98], ["Allosaurus", 9.7, 2300, 34, 152],
+      ["Velociraptor", 2, 15, 40, 74], ["Carnotaurus", 8, 1350, 48, 71], ["Brachiosaurus", 22, 40000, 18, 154], ["Diplodocus", 26, 15000, 15, 152],
+      ["Argentinosaurus", 35, 70000, 8, 94], ["Triceratops", 9, 8000, 32, 67], ["Stegosaurus", 9, 5000, 7, 152], ["Ankylosaurus", 8, 6000, 10, 67],
+      ["Parasaurolophus", 9.5, 2500, 40, 76], ["Iguanodon", 10, 3500, 24, 125], ["Pachycephalosaurus", 4.5, 450, 32, 68], ["Compsognathus", 1, 3, 64, 150]] }
+};
+
+/* Space: a planet or moon floating in a starfield */
+const SPACE_ART = {
+  "Mercury": { c: "#9a8f86", r: 26, kind: "rock" }, "Venus": { c: "#e3b86b", r: 36, kind: "haze" }, "Earth": { c: "#2f7fd8", r: 37, kind: "earth" },
+  "Mars": { c: "#c8573a", r: 30, kind: "rock" }, "Jupiter": { c: "#d9a877", r: 46, kind: "gas", bands: ["#b97b4f", "#f1dcc0", "#a8653d", "#e8c9a0"], spot: true },
+  "Saturn": { c: "#e6c98f", r: 34, kind: "gas", bands: ["#cfae73", "#f3e2bb", "#c19a5d"], rings: true }, "Uranus": { c: "#8fd3df", r: 34, kind: "ice", rings: "thin", tilt: 80 },
+  "Neptune": { c: "#3d6fe0", r: 33, kind: "ice", spot: true }, "Pluto": { c: "#d8c3aa", r: 22, kind: "pluto" }, "Ceres": { c: "#8c8a86", r: 17, kind: "rock" },
+  "Eris": { c: "#e9e6e1", r: 21, kind: "rock" }, "The Moon": { c: "#c9c6c0", r: 25, kind: "rock" }, "Io": { c: "#e8d04a", r: 25, kind: "io" },
+  "Europa": { c: "#e4d8c5", r: 23, kind: "europa" }, "Ganymede": { c: "#a39886", r: 28, kind: "rock" }, "Titan": { c: "#d99a3f", r: 28, kind: "haze" }
+};
+function spaceSVG(name) {
+  const p = SPACE_ART[name]; if (!p) return "";
+  const id = "sp" + (++artSeq), cx = 130, cy = 62, r = p.r;
+  let seed = [...name].reduce((a, ch) => a * 31 + ch.charCodeAt(0) & 0xffff, 7);
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const stars = Array.from({ length: 26 }, () => `<circle cx="${(rnd() * 200).toFixed(1)}" cy="${(rnd() * 125).toFixed(1)}" r="${(rnd() * .9 + .3).toFixed(2)}" fill="#fff" opacity="${(rnd() * .6 + .25).toFixed(2)}"/>`).join("");
+  let surface = "";
+  if (p.kind === "gas") surface = (p.bands || []).map((b, i) => `<rect x="${cx - r}" y="${cy - r + (i + .5) * (2 * r / (p.bands.length + .5)) - 3}" width="${2 * r}" height="${r / 5}" fill="${b}" opacity=".7"/>`).join("") + (p.spot ? `<ellipse cx="${cx + r * .3}" cy="${cy + r * .3}" rx="${r * .22}" ry="${r * .12}" fill="#b5523a" opacity=".85"/>` : "");
+  else if (p.kind === "earth") surface = `<path d="M${cx - 22},${cy - 18} q10,-10 22,-4 q6,8 -4,14 q-10,4 -8,14 q-8,4 -14,-6 q-4,-10 4,-18 Z M${cx + 6},${cy + 4} q14,-6 22,4 q2,14 -10,20 q-10,0 -12,-10 Z" fill="#3fa363"/><ellipse cx="${cx - 6}" cy="${cy - r + 7}" rx="16" ry="5" fill="#fff" opacity=".85"/><path d="M${cx - 30},${cy + 4} q20,-6 40,2 M${cx - 10},${cy + 22} q20,-6 34,0" stroke="#fff" stroke-width="3" fill="none" opacity=".55" stroke-linecap="round"/>`;
+  else if (p.kind === "rock") surface = Array.from({ length: 7 }, () => { const a = rnd() * 6.28, d = rnd() * r * .7, cr = r * (.08 + rnd() * .14); return `<circle cx="${(cx + Math.cos(a) * d).toFixed(1)}" cy="${(cy + Math.sin(a) * d).toFixed(1)}" r="${cr.toFixed(1)}" fill="#000" opacity=".16"/><circle cx="${(cx + Math.cos(a) * d - cr * .25).toFixed(1)}" cy="${(cy + Math.sin(a) * d - cr * .25).toFixed(1)}" r="${(cr * .7).toFixed(1)}" fill="#fff" opacity=".07"/>`; }).join("");
+  else if (p.kind === "haze") surface = `<path d="M${cx - r},${cy - 6} q${r},-10 ${2 * r},0 M${cx - r},${cy + 8} q${r},10 ${2 * r},0" stroke="#fff" stroke-width="5" opacity=".18" fill="none"/>`;
+  else if (p.kind === "ice") surface = `<rect x="${cx - r}" y="${cy - 4}" width="${2 * r}" height="6" fill="#fff" opacity=".12"/>` + (p.spot ? `<ellipse cx="${cx - r * .25}" cy="${cy - r * .3}" rx="${r * .2}" ry="${r * .1}" fill="#1c3d8f" opacity=".7"/>` : "");
+  else if (p.kind === "io") surface = Array.from({ length: 8 }, () => { const a = rnd() * 6.28, d = rnd() * r * .75; return `<circle cx="${(cx + Math.cos(a) * d).toFixed(1)}" cy="${(cy + Math.sin(a) * d).toFixed(1)}" r="${(2 + rnd() * 4).toFixed(1)}" fill="${rnd() > .5 ? "#c4521f" : "#2b2b2b"}" opacity=".7"/>`; }).join("");
+  else if (p.kind === "europa") surface = Array.from({ length: 7 }, () => { const a = rnd() * 6.28, b = a + 1.8 + rnd(); return `<path d="M${(cx + Math.cos(a) * r).toFixed(1)},${(cy + Math.sin(a) * r).toFixed(1)} Q${cx + (rnd() - .5) * r},${cy + (rnd() - .5) * r} ${(cx + Math.cos(b) * r).toFixed(1)},${(cy + Math.sin(b) * r).toFixed(1)}" stroke="#a5683c" stroke-width="1.4" fill="none" opacity=".7"/>`; }).join("");
+  else if (p.kind === "pluto") surface = `<path d="M${cx - 2},${cy + 2} q8,-12 16,-4 q6,10 -2,18 q-10,2 -14,-14 Z" fill="#f5ece0" opacity=".9"/><circle cx="${cx - 10}" cy="${cy - 8}" r="5" fill="#8a5a3c" opacity=".5"/>`;
+  const ringBack = p.rings === true ? `<ellipse cx="${cx}" cy="${cy}" rx="${r * 1.9}" ry="${r * .45}" fill="none" stroke="#e8d4a6" stroke-width="7" opacity=".55" transform="rotate(-14 ${cx} ${cy})"/>` : p.rings === "thin" ? `<ellipse cx="${cx}" cy="${cy}" rx="${r * .35}" ry="${r * 1.55}" fill="none" stroke="#dff4f7" stroke-width="1.5" opacity=".5"/>` : "";
+  const ringFront = p.rings === true ? `<path d="M${cx - r * 1.9},${cy} a${r * 1.9},${r * .45} 0 0 0 ${r * 3.8},0" fill="none" stroke="#f1e2bb" stroke-width="7" opacity=".85" transform="rotate(-14 ${cx} ${cy})"/>` : "";
+  return `<svg class="illus space" viewBox="0 0 200 125" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs><radialGradient id="${id}" cx=".35" cy=".35" r=".75"><stop offset="0" stop-color="${shade(p.c, .25)}"/><stop offset=".6" stop-color="${p.c}"/><stop offset="1" stop-color="${shade(p.c, -.45)}"/></radialGradient>
+      <radialGradient id="${id}s" cx=".3" cy=".3" r=".9"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>
+      <clipPath id="${id}c"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath></defs>
+    <rect width="200" height="125" fill="#0b1026" opacity=".55"/>${stars}
+    <circle cx="${cx}" cy="${cy}" r="${r + 6}" fill="${p.c}" opacity=".12"/>
+    ${ringBack}
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id})"/>
+    <g clip-path="url(#${id}c)">${surface}<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}s)"/></g>
+    ${ringFront}
+  </svg>`;
+}
+
+/* Flags: drawn flat on a 120 x 80 cloth with a soft wave */
+function flagBody(name) {
+  const W = 120, H = 80;
+  const v3 = (a, b, c) => `<rect width="40" height="80" fill="${a}"/><rect x="40" width="40" height="80" fill="${b}"/><rect x="80" width="40" height="80" fill="${c}"/>`;
+  const h3 = (a, b, c) => `<rect width="120" height="27" fill="${a}"/><rect y="26.6" width="120" height="27" fill="${b}"/><rect y="53.3" width="120" height="26.7" fill="${c}"/>`;
+  const star = (x, y, r, rot = 0) => { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + rot + i * Math.PI / 5, rr = i % 2 ? r * .4 : r; pts.push((x + Math.cos(a) * rr).toFixed(2) + "," + (y + Math.sin(a) * rr).toFixed(2)); } return `<polygon points="${pts.join(" ")}" fill="#ffde00"/>`; };
+  switch (name) {
+    case "Japan": return `<rect width="${W}" height="${H}" fill="#fff"/><circle cx="60" cy="40" r="24" fill="#bc002d"/>`;
+    case "France": return v3("#0055a4", "#fff", "#ef4135");
+    case "Italy": return v3("#009246", "#fff", "#ce2b37");
+    case "Ireland": return v3("#169b62", "#fff", "#ff883e");
+    case "Germany": return h3("#000", "#dd0000", "#ffce00");
+    case "Netherlands": return h3("#ae1c28", "#fff", "#21468b");
+    case "Mexico": return v3("#006847", "#fff", "#ce1126") + `<circle cx="60" cy="40" r="11" fill="#8c5a2b" opacity=".85"/><path d="M52,44 q8,6 16,0" stroke="#3a7d2c" stroke-width="2" fill="none"/>`;
+    case "Sweden": return `<rect width="${W}" height="${H}" fill="#006aa7"/><rect x="34" width="16" height="80" fill="#fecc00"/><rect y="32" width="120" height="16" fill="#fecc00"/>`;
+    case "Norway": return `<rect width="${W}" height="${H}" fill="#ba0c2f"/><rect x="30" width="22" height="80" fill="#fff"/><rect y="29" width="120" height="22" fill="#fff"/><rect x="35" width="12" height="80" fill="#00205b"/><rect y="34" width="120" height="12" fill="#00205b"/>`;
+    case "Brazil": return `<rect width="${W}" height="${H}" fill="#009c3b"/><polygon points="60,8 112,40 60,72 8,40" fill="#ffdf00"/><circle cx="60" cy="40" r="19" fill="#002776"/><path d="M42,36 q18,-6 37,6" stroke="#fff" stroke-width="3.4" fill="none"/>`;
+    case "India": return h3("#ff9933", "#fff", "#138808") + `<circle cx="60" cy="40" r="9" fill="none" stroke="#000080" stroke-width="1.8"/>${Array.from({ length: 12 }, (_, i) => `<line x1="60" y1="40" x2="${(60 + Math.cos(i * Math.PI / 6) * 9).toFixed(2)}" y2="${(40 + Math.sin(i * Math.PI / 6) * 9).toFixed(2)}" stroke="#000080" stroke-width=".8"/>`).join("")}`;
+    case "United Kingdom": return `<rect width="${W}" height="${H}" fill="#012169"/><path d="M0,0 L120,80 M120,0 L0,80" stroke="#fff" stroke-width="15"/><path d="M0,0 L120,80 M120,0 L0,80" stroke="#c8102e" stroke-width="5"/><rect x="48" width="24" height="80" fill="#fff"/><rect y="28" width="120" height="24" fill="#fff"/><rect x="53" width="14" height="80" fill="#c8102e"/><rect y="33" width="120" height="14" fill="#c8102e"/>`;
+    case "United States": return `<rect width="${W}" height="${H}" fill="#fff"/>${Array.from({ length: 7 }, (_, i) => `<rect y="${(i * 2 * H / 13).toFixed(2)}" width="120" height="${(H / 13).toFixed(2)}" fill="#b22234"/>`).join("")}<rect width="50" height="${(7 * H / 13).toFixed(2)}" fill="#3c3b6e"/>${Array.from({ length: 20 }, (_, i) => `<circle cx="${5 + (i % 5) * 10}" cy="${5.5 + Math.floor(i / 5) * 10}" r="1.7" fill="#fff"/>`).join("")}`;
+    case "Jamaica": return `<rect width="${W}" height="${H}" fill="#009b3a"/><polygon points="0,0 60,40 0,80" fill="#000"/><polygon points="120,0 60,40 120,80" fill="#000"/><path d="M0,0 L120,80 M120,0 L0,80" stroke="#fed100" stroke-width="12"/>`;
+    case "Greece": return `${Array.from({ length: 9 }, (_, i) => `<rect y="${(i * H / 9).toFixed(2)}" width="120" height="${(H / 9 + .2).toFixed(2)}" fill="${i % 2 ? "#fff" : "#0d5eaf"}"/>`).join("")}<rect width="${(5 * H / 9).toFixed(2)}" height="${(5 * H / 9).toFixed(2)}" fill="#0d5eaf"/><rect x="${(2 * H / 9).toFixed(2)}" width="${(H / 9).toFixed(2)}" height="${(5 * H / 9).toFixed(2)}" fill="#fff"/><rect y="${(2 * H / 9).toFixed(2)}" width="${(5 * H / 9).toFixed(2)}" height="${(H / 9).toFixed(2)}" fill="#fff"/>`;
+    case "China": return `<rect width="${W}" height="${H}" fill="#de2910"/>${star(20, 20, 12)}${star(40, 8, 4, .4)}${star(48, 16, 4, .2)}${star(48, 27, 4, 0)}${star(40, 35, 4, -.3)}`;
+  }
+  return "";
+}
+function flagSVG(name) {
+  const body = flagBody(name); if (!body) return "";
+  const id = "fl" + (++artSeq);
+  return `<svg class="illus flag" viewBox="0 0 200 125" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs><clipPath id="${id}c"><path d="M0,4 Q30,-4 60,4 T120,4 L120,84 Q90,76 60,84 T0,84 Z"/></clipPath>
+      <linearGradient id="${id}w" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".25" stop-color="#000" stop-opacity=".12"/><stop offset=".5" stop-color="#fff" stop-opacity=".16"/><stop offset=".75" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".1"/></linearGradient></defs>
+    <rect x="34" y="14" width="3.4" height="104" rx="1.5" fill="#e8e3da"/><circle cx="35.7" cy="13" r="3.2" fill="#f2d27a"/>
+    <g transform="translate(37 18)">
+      <g transform="translate(3 5)" opacity=".25"><path d="M0,4 Q30,-4 60,4 T120,4 L120,84 Q90,76 60,84 T0,84 Z" fill="#000"/></g>
+      <g clip-path="url(#${id}c)"><g transform="translate(0 4)">${body}</g><rect width="120" height="90" fill="url(#${id}w)"/></g>
+    </g>
+  </svg>`;
+}
+
+/* Dinosaurs: friendly flat silhouettes from a few body plans */
+const DINO_ART = {
+  "Tyrannosaurus": { plan: "rex", c: "#5f7d4a", belly: "#c9b98a" }, "Giganotosaurus": { plan: "rex", c: "#8a5a3c", belly: "#d8c19a", stripes: true },
+  "Allosaurus": { plan: "rex", c: "#a0643c", belly: "#e2c9a0", crest: true }, "Carnotaurus": { plan: "rex", c: "#b5473a", belly: "#e8c7a8", horns: true },
+  "Spinosaurus": { plan: "rex", c: "#4f7f86", belly: "#d2c7a5", sail: true, long: true }, "Velociraptor": { plan: "raptor", c: "#8f6f3f", belly: "#e3d0a6", feathers: true },
+  "Compsognathus": { plan: "raptor", c: "#6d8f4a", belly: "#dfe0b0" }, "Brachiosaurus": { plan: "sauro", c: "#7d8a6a", belly: "#d4cfb1", tall: true },
+  "Diplodocus": { plan: "sauro", c: "#8a7f68", belly: "#ddd3b8" }, "Argentinosaurus": { plan: "sauro", c: "#6a7b8a", belly: "#cfd4cf", big: true },
+  "Triceratops": { plan: "trike", c: "#9c6b46", belly: "#e3caa3" }, "Stegosaurus": { plan: "stego", c: "#6f8a4e", belly: "#d8d0a3" },
+  "Ankylosaurus": { plan: "anky", c: "#8a7a5a", belly: "#d9cca8" }, "Parasaurolophus": { plan: "duck", c: "#5a7fa0", belly: "#d6d7c4", tube: true },
+  "Iguanodon": { plan: "duck", c: "#7a8a4c", belly: "#dcd5a8", thumb: true }, "Pachycephalosaurus": { plan: "dome", c: "#a0704a", belly: "#e6cfa6" }
+};
+function dinoSVG(name) {
+  const d = DINO_ART[name]; if (!d) return "";
+  const c = d.c, dk = shade(c, -.28), b = d.belly, eye = `#1b1b1b`;
+  const leg = (x, y, h, w = 11, col = dk) => `<path d="M${x - w / 2},${y} L${x - w / 2 + 1},${y + h - 3} Q${x - w / 2 + 1},${y + h} ${x - w / 2 + 5},${y + h} L${x + w / 2 + 3},${y + h} Q${x + w / 2 + 3},${y + h - 4} ${x + w / 2},${y + h - 5} L${x + w / 2},${y} Z" fill="${col}"/>`;
+  let g = "";
+  if (d.plan === "rex") {
+    const L = d.long ? 8 : 0;
+    g = `${d.sail ? `<path d="M${70 - L},58 Q${84},${14} ${100},${18} Q${114},${16} ${122 + L},56 Z" fill="${shade(c, .12)}" stroke="${dk}" stroke-width="1"/>${[0, 1, 2, 3, 4].map(i => `<path d="M${78 + i * 9},56 L${84 + i * 8},${24 + Math.abs(i - 2) * 4}" stroke="${dk}" stroke-width="1" opacity=".5"/>`).join("")}` : ""}
+      ${leg(84, 78, 34, 13)}
+      <path d="M6,${76 - L / 2} Q40,${62} ${70},${56} Q${100},${50} ${128},${54} Q${140},${56} ${146},${50} L${150},${46} Q${154},${38} ${168},${36} Q${186},${35} ${194},${42} Q${196},${48} ${188},${50} L${170},${51} Q${176},${55} ${184},${55} Q${186},${60} ${176},${61} Q${158},${62} ${146},${66} Q${132},${82} ${108},${86} Q${80},${88} ${62},${80} Q${34},${80} 6,${76 - L / 2} Z" fill="${c}"/>
+      <path d="M${70},${78} Q${94},${88} ${120},${80} Q${132},${74} ${142},${64} Q${128},${80} ${104},${84} Q${84},${86} ${70},${78} Z" fill="${b}" opacity=".9"/>
+      ${leg(102, 74, 38, 15, c)}<ellipse cx="104" cy="72" rx="13" ry="14" fill="${shade(c, .06)}"/>
+      <path d="M${140},${64} Q${148},${70} ${146},${76}" stroke="${dk}" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M${172},${51} l2,4 l3,-4 l3,4 l3,-4 l3,4 l2,-4" stroke="#fff" stroke-width="1.2" fill="none" opacity=".9"/>
+      <circle cx="${174}" cy="${42}" r="2.6" fill="#fff"/><circle cx="${174.6}" cy="${42}" r="1.5" fill="${eye}"/>
+      ${d.horns ? `<path d="M${168},${37} l-2,-9 l7,6 Z" fill="${dk}"/>` : ""}${d.crest ? `<path d="M${170},${36} q6,-6 14,-2" stroke="${dk}" stroke-width="3" fill="none"/>` : ""}
+      ${d.stripes ? [0, 1, 2, 3].map(i => `<path d="M${70 + i * 14},${58 - i} q4,8 0,16" stroke="${dk}" stroke-width="3" fill="none" opacity=".55"/>`).join("") : ""}`;
+  } else if (d.plan === "raptor") {
+    g = `${leg(92, 74, 38, 9)}
+      <path d="M4,60 Q40,56 74,62 Q96,58 116,60 Q126,52 136,44 Q140,36 152,36 Q166,36 170,42 Q170,46 162,47 L150,48 Q142,54 134,66 Q122,82 100,82 Q80,82 70,72 Q36,68 4,60 Z" fill="${c}"/>
+      <path d="M76,72 Q98,82 118,74 Q126,70 132,64 Q122,80 100,81 Q86,80 76,72 Z" fill="${b}"/>
+      ${leg(104, 70, 42, 11, c)}<path d="M128,62 q6,6 2,12 l3,2" stroke="${dk}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M104,112 l6,-5" stroke="${dk}" stroke-width="2"/>
+      ${d.feathers ? `<path d="M118,58 q-6,-12 2,-18 M110,59 q-4,-10 2,-15" stroke="${shade(c, .2)}" stroke-width="3" fill="none" stroke-linecap="round"/>` : ""}
+      <circle cx="156" cy="41" r="2.2" fill="#fff"/><circle cx="156.5" cy="41" r="1.3" fill="${eye}"/>`;
+  } else if (d.plan === "sauro") {
+    const t = d.tall ? 1 : 0, bg = d.big ? 1.06 : 1;
+    g = `<g transform="translate(100 112) scale(${bg}) translate(-100 -112)">
+      ${leg(66, 80, 32, 13)}${leg(110, 80, 32, 13)}
+      <path d="M2,98 Q30,84 54,74 Q74,58 100,58 Q122,58 132,70 Q${t ? 146 : 150},${t ? 40 : 48} ${t ? 156 : 166},${t ? 18 : 26} Q${t ? 160 : 172},${t ? 10 : 20} ${t ? 170 : 182},${t ? 10 : 20} Q${t ? 180 : 192},${t ? 12 : 22} ${t ? 176 : 188},${t ? 18 : 28} L${t ? 166 : 178},${t ? 20 : 30} Q${t ? 154 : 164},${t ? 48 : 52} 142,82 Q124,96 96,96 Q66,96 54,88 Q30,92 2,98 Z" fill="${c}"/>
+      <path d="M60,88 Q90,98 124,90 Q134,86 140,80 Q128,96 98,96 Q72,96 60,88 Z" fill="${b}"/>
+      ${leg(78, 82, 30, 14, c)}${leg(124, 80, 32, 14, c)}
+      <circle cx="${t ? 170 : 182}" cy="${t ? 14 : 24}" r="1.8" fill="${eye}"/></g>`;
+  } else if (d.plan === "trike") {
+    g = `${leg(62, 82, 30, 14)}${leg(112, 82, 30, 14)}
+      <path d="M6,82 Q30,70 56,62 Q86,52 116,58 Q132,62 140,70 L144,86 Q128,98 98,98 Q66,98 52,92 Q30,88 6,82 Z" fill="${c}"/>
+      <path d="M138,40 Q156,34 162,52 Q166,70 152,84 Q136,86 130,70 Q126,48 138,40 Z" fill="${shade(c, .12)}" stroke="${dk}" stroke-width="1.2"/>
+      <path d="M146,62 Q160,58 176,64 Q186,70 184,78 Q174,84 160,84 Q148,84 144,74 Z" fill="${c}"/>
+      <path d="M156,60 L176,40 L162,62 Z M150,58 L164,36 L156,60 Z" fill="#efe6d2"/><path d="M180,68 L192,62 L184,72 Z" fill="#efe6d2"/>
+      <path d="M58,90 Q90,100 124,92 Q136,88 142,82 Q128,98 98,98 Q72,98 58,90 Z" fill="${b}"/>
+      ${leg(78, 84, 28, 15, c)}${leg(128, 82, 30, 15, c)}
+      <circle cx="166" cy="66" r="2.2" fill="#fff"/><circle cx="166.6" cy="66" r="1.3" fill="${eye}"/>
+      ${[0, 1, 2, 3, 4].map(i => `<circle cx="${144 + Math.cos(-1.9 + i * .55) * 18}" cy="${62 + Math.sin(-1.9 + i * .55) * 22}" r="2" fill="${dk}" opacity=".6"/>`).join("")}`;
+  } else if (d.plan === "stego") {
+    g = `${[0, 1, 2, 3, 4, 5, 6].map(i => { const x = 40 + i * 14, h = 18 - Math.abs(i - 3) * 3 + 8; return `<path d="M${x - 7},${62 - Math.abs(i - 3) * -2 + 4} L${x},${46 - h / 2 + Math.abs(i - 3) * 3} L${x + 7},${62 + 4 - Math.abs(i - 3) * -2} Z" fill="${shade(c, .18)}" stroke="${dk}" stroke-width="1"/>`; }).join("")}
+      ${leg(62, 82, 30, 14)}${leg(114, 82, 30, 13)}
+      <path d="M4,72 Q26,74 42,70 Q70,56 100,60 Q130,62 146,76 Q156,80 170,80 Q180,80 182,86 Q176,92 164,92 Q150,92 140,90 Q122,98 96,98 Q66,98 48,88 Q26,82 4,72 Z" fill="${c}"/>
+      <path d="M8,72 l-6,-8 M14,73 l-4,-10" stroke="#efe6d2" stroke-width="3" stroke-linecap="round"/>
+      <path d="M52,88 Q86,100 124,92 Q134,90 140,88 Q124,98 96,98 Q68,98 52,88 Z" fill="${b}"/>
+      ${leg(80, 84, 28, 14, c)}${leg(128, 84, 28, 13, c)}
+      <circle cx="172" cy="84" r="1.8" fill="${eye}"/>`;
+  } else if (d.plan === "anky") {
+    g = `${leg(60, 86, 26, 14)}${leg(118, 86, 26, 14)}
+      <path d="M10,84 Q30,84 40,80 Q60,62 98,62 Q134,62 150,78 Q164,80 176,84 Q186,88 182,94 Q170,98 154,96 Q140,100 98,100 Q60,100 44,92 Q30,90 10,88 Z" fill="${c}"/>
+      <ellipse cx="10" cy="86" rx="10" ry="7" fill="${dk}"/>
+      ${Array.from({ length: 9 }, (_, i) => `<path d="M${50 + i * 11},${70 - Math.sin(i / 8 * Math.PI) * 6} l4,-9 l4,9 Z" fill="#efe6d2"/>`).join("")}
+      ${Array.from({ length: 12 }, (_, i) => `<circle cx="${52 + (i % 6) * 16}" cy="${78 + Math.floor(i / 6) * 9}" r="3" fill="${dk}" opacity=".45"/>`).join("")}
+      <path d="M50,94 Q90,104 140,96 Q120,100 98,100 Q66,100 50,94 Z" fill="${b}"/>
+      ${leg(76, 88, 24, 15, c)}${leg(134, 88, 24, 14, c)}
+      <circle cx="172" cy="87" r="1.8" fill="${eye}"/>`;
+  } else if (d.plan === "duck") {
+    g = `${leg(84, 80, 32, 12)}
+      <path d="M4,70 Q40,64 70,62 Q100,56 120,60 Q134,48 140,36 Q146,26 158,26 Q174,26 182,34 Q186,40 178,42 L164,44 Q154,50 148,62 Q138,80 112,86 Q84,88 68,78 Q36,74 4,70 Z" fill="${c}"/>
+      ${d.tube ? `<path d="M152,28 Q130,16 112,12" stroke="${shade(c, .12)}" stroke-width="7" fill="none" stroke-linecap="round"/>` : ""}
+      <path d="M72,78 Q98,88 124,80 Q136,74 146,64 Q134,82 110,85 Q88,86 72,78 Z" fill="${b}"/>
+      ${leg(104, 76, 36, 14, c)}<path d="M136,64 q6,8 2,14" stroke="${dk}" stroke-width="4" fill="none" stroke-linecap="round"/>
+      ${d.thumb ? `<path d="M138,78 l4,6 l-6,-2 Z" fill="#efe6d2"/>` : ""}
+      <circle cx="164" cy="34" r="2.2" fill="#fff"/><circle cx="164.6" cy="34" r="1.3" fill="${eye}"/>`;
+  } else if (d.plan === "dome") {
+    g = `${leg(84, 80, 32, 12)}
+      <path d="M8,72 Q40,66 70,64 Q100,58 122,62 Q132,54 138,46 Q140,32 156,28 Q174,26 180,40 Q184,50 176,54 L164,56 Q154,60 148,68 Q138,84 112,88 Q84,90 68,80 Q38,76 8,72 Z" fill="${c}"/>
+      <path d="M142,40 Q146,24 162,24 Q178,26 180,40 Q166,32 142,40 Z" fill="#efe6d2"/>
+      ${[0, 1, 2, 3].map(i => `<circle cx="${146 + i * 8}" cy="${32 + (i % 2) * 2}" r="1.6" fill="${dk}"/>`).join("")}
+      <path d="M72,80 Q98,90 124,82 Q136,76 146,66 Q134,84 110,87 Q88,88 72,80 Z" fill="${b}"/>
+      ${leg(104, 78, 34, 13, c)}
+      <circle cx="166" cy="44" r="2.2" fill="#fff"/><circle cx="166.6" cy="44" r="1.3" fill="${eye}"/>`;
+  }
+  return `<svg class="illus dino" viewBox="0 0 200 125" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <ellipse cx="100" cy="113" rx="86" ry="6" fill="#000" opacity=".2"/>
+    <g transform="translate(6 2) scale(.94)">${g}</g>
+  </svg>`;
+}
+
+Object.values(NEW_DECKS).forEach(d => { LOCAL_DECKS[d.key] = d; });
+
 function monogram(name) {
   const words = String(name || "?").trim().split(/\s+/).filter(Boolean);
   const ini = esc(((words[0] || "?")[0] + (words.length > 1 ? words[words.length - 1][0] : "")).toUpperCase());
@@ -1092,6 +1309,9 @@ function artFor(d, c) {
   if (d.custom) return monogram(c.name);
   if (d.key === "cats" || CAT_ART[c.name]) return catSVG(c.name, c.id);
   if (d.key === "cars" || CAR_ART[c.name]) return carSVG(c.name, c.id);
+  if (SPACE_ART[c.name]) return spaceSVG(c.name);
+  if (DINO_ART[c.name]) return dinoSVG(c.name);
+  if (d.key === "flags") return flagSVG(c.name);
   return "";
 }
 
@@ -1500,7 +1720,7 @@ function scheduleDraftReload() {
     await loadDraft();
     if (!G || !$("rateTrack")) return;
     if (!G.d || G.d.status !== "open") { toast("This group deck was closed"); G = null; return home(); }
-    if (draftSig() !== before && !(document.activeElement && document.activeElement.matches && document.activeElement.matches("#rateTrack input, #addPanel input"))) renderDraft(true);
+    if (draftSig() !== before && !(document.activeElement && document.activeElement.matches && document.activeElement.matches("#rateTrack input, #addPanel input, #placesPanel input"))) renderDraft(true);
     else patchDraft();
   }, 250);
 }
@@ -1620,8 +1840,10 @@ function renderDraft(keep) {
     <div class="gprog" id="gProg">${progressHTML()}</div>
     <div class="gadd">
       <button type="button" class="btn primary small" id="gPhotoBtn">${CAMERA}Add from a group photo</button>
+      <button type="button" class="btn ghost small" id="gMapBtn">${MAP_PIN}From the map</button>
       <button type="button" class="btn ghost small" id="gAddBtn">${PLUS}Add a card</button>
     </div>
+    <div id="placesSlot">${PS && PS.target.kind === "group" ? placesHTML(PS.target.slots()) : ""}</div>
     <div id="addSlot">${G.split ? splitHTML() : addPanelHTML()}</div>
     <div class="rate-wrap">
       <div class="rate-track" id="rateTrack">
@@ -1682,6 +1904,8 @@ function wireDraft() {
   $("gAddTile").onclick = () => openCardForm(null);
   $("gPhotoTile").onclick = $("gPhotoBtn").onclick = () => { $("spFile").value = ""; $("spFile").click(); };
   $("gAddBtn").onclick = () => openCardForm(null);
+  $("gMapBtn").onclick = () => { G.form = null; G.split = null; $("addSlot").innerHTML = ""; openPlaces(groupPlacesTarget()); };
+  if (PS && PS.target.kind === "group") wirePlaces();
   $("spFile").onchange = e => { const f = e.target.files && e.target.files[0]; if (f) { startSplit(f); $("addSlot").scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" }); } };
   t.querySelectorAll("input[type=range]").forEach(inp => {
     const go = () => onSlide(inp);
@@ -1991,6 +2215,176 @@ async function saveSplit() {
   renderDraft(true);
   if (done) scrollToCard(Math.max(0, G.cards.length - done));
 }
+
+
+/* ---------- Map search: find real places (OpenStreetMap) and turn them into cards ---------- */
+const OSM_SEARCH = "https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&extratags=1&accept-language=en";
+const PLACE_KINDS = [
+  { words: ["pubs", "pub", "boozers", "locals"], q: "pub", types: ["pub", "bar"] },
+  { words: ["bars", "bar", "cocktail bars"], q: "bar", types: ["bar", "pub"] },
+  { words: ["cafes", "cafés", "cafe", "café", "coffee shops", "coffee"], q: "cafe", types: ["cafe"] },
+  { words: ["restaurants", "restaurant", "places to eat"], q: "restaurant", types: ["restaurant"] },
+  { words: ["takeaways", "takeaway", "chippies", "chippy", "fast food"], q: "fast food", types: ["fast_food"] },
+  { words: ["parks", "park"], q: "park", types: ["park"] },
+  { words: ["gyms", "gym"], q: "gym", types: ["fitness_centre", "sports_centre"] },
+  { words: ["football grounds", "stadiums", "stadium", "grounds"], q: "stadium", types: ["stadium"] },
+  { words: ["museums", "museum"], q: "museum", types: ["museum", "gallery"] },
+  { words: ["cinemas", "cinema"], q: "cinema", types: ["cinema"] },
+  { words: ["clubs", "nightclubs", "nightclub"], q: "nightclub", types: ["nightclub"] },
+  { words: ["breweries", "brewery"], q: "brewery", types: ["brewery", "pub"] },
+  { words: ["beaches", "beach"], q: "beach", types: ["beach"] },
+  { words: ["hotels", "hotel"], q: "hotel", types: ["hotel"] },
+  { words: ["golf courses", "golf"], q: "golf course", types: ["golf_course"] }
+];
+const PLACE_CHIPS = ["Pubs", "Bars", "Cafés", "Restaurants", "Parks", "Gyms"];
+const placesWait = ms => new Promise(r => setTimeout(r, ms));
+let lastOsmCall = 0;
+async function osmGet(params) {
+  // OpenStreetMap asks for at most one search a second
+  const gap = Date.now() - lastOsmCall; if (gap < 1100) await placesWait(1100 - gap);
+  lastOsmCall = Date.now();
+  const r = await fetch(OSM_SEARCH + "&" + new URLSearchParams(params));
+  if (!r.ok) throw new Error("The map search is busy. Try again in a moment.");
+  return r.json();
+}
+function parsePlaceQuery(text) {
+  let t = " " + text.toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, " ").trim() + " ";
+  let kind = null;
+  for (const k of PLACE_KINDS) for (const w of k.words) if (!kind && t.includes(" " + w + " ")) { kind = k; t = t.replace(" " + w + " ", " "); }
+  let where = t.replace(/\b(in|near|around|best|the|top)\b/g, " ").replace(/\s+/g, " ").trim();
+  let dir = null; const m = where.match(/^(north|south|east|west|central|centre of|center of)\s+(.+)$/);
+  if (m) { dir = m[1].startsWith("cent") ? "central" : m[1]; where = m[2]; }
+  return { kind, where, dir };
+}
+async function searchPlaces(text) {
+  const { kind, where, dir } = parsePlaceQuery(text);
+  if (!kind) {
+    // not a type we know: let OpenStreetMap read the whole thing
+    const res = await osmGet({ q: text, limit: 40 });
+    return { label: text, results: res.filter(x => x.name) };
+  }
+  if (!where) throw new Error(`Where should we look for ${kind.words[0]}? Try "${kind.words[0]} in Brixton".`);
+  const geo = await osmGet({ q: where, limit: 5, featureType: "settlement" }).catch(() => []);
+  const area = geo[0] || (await osmGet({ q: where, limit: 1 }))[0];
+  if (!area) throw new Error(`Couldn't find "${where}" on the map. Try a town or area name.`);
+  let lat = +area.lat, lon = +area.lon;
+  const [s, n, w, e] = area.boundingbox.map(Number);
+  let hLat = Math.min(.045, Math.max(.012, (n - s) / 2)), hLon = Math.min(.07, Math.max(.018, (e - w) / 2));
+  if (dir) {
+    // "south London": centre on that side of the place
+    const bigLat = Math.max(.03, (n - s) / 4), bigLon = Math.max(.05, (e - w) / 4);
+    if (dir === "north") lat += bigLat; if (dir === "south") lat -= bigLat;
+    if (dir === "east") lon += bigLon; if (dir === "west") lon -= bigLon;
+    hLat = .045; hLon = .07;
+  }
+  const viewbox = [lon - hLon, lat + hLat, lon + hLon, lat - hLat].join(",");
+  const res = await osmGet({ q: kind.q, limit: 40, bounded: 1, viewbox });
+  const seen = new Set();
+  const results = res.filter(x => x.name && kind.types.includes(x.type) && !seen.has(x.name.toLowerCase()) && seen.add(x.name.toLowerCase()));
+  const place = (area.name || where).replace(/^./, c => c.toUpperCase());
+  return { label: `${kind.words[0].replace(/^./, c => c.toUpperCase())} in ${dir ? dir.replace(/^./, c => c.toUpperCase()) + " " : ""}${place}`, results, centre: [lat, lon] };
+}
+function placeSub(x, centre) {
+  const a = x.address || {}, bits = [a.road, a.suburb || a.neighbourhood || a.town || a.city].filter(Boolean);
+  if (centre) {
+    const R = 6371, dLa = (x.lat - centre[0]) * Math.PI / 180, dLo = (x.lon - centre[1]) * Math.PI / 180;
+    const h = Math.sin(dLa / 2) ** 2 + Math.cos(centre[0] * Math.PI / 180) * Math.cos(x.lat * Math.PI / 180) * Math.sin(dLo / 2) ** 2;
+    bits.push((2 * R * Math.asin(Math.sqrt(h))).toFixed(1) + " km away");
+  }
+  return bits.join(" · ");
+}
+
+/* The panel: search, tick the places you want, add them as cards */
+let PS = null;
+function placesHTML(slots) {
+  const s = PS; if (!s) return "";
+  const picked = s.results.filter(r => r.on).length;
+  return `
+    <div class="panel addcard places" id="placesPanel">
+      <div class="panel-head"><h2>Add places from the map</h2><button type="button" class="link" id="plClose">Close</button></div>
+      <form class="row-form" id="plForm"><div class="field"><input id="plQ" value="${esc(s.q)}" placeholder="e.g. pubs in Brixton, south London cafés" autocomplete="off" enterkeyhint="search"></div><button type="submit" class="btn primary small" id="plGo">${s.busy ? "Searching…" : "Search"}</button></form>
+      <div class="pl-chips">${PLACE_CHIPS.map(c => `<button type="button" class="chip-btn" data-plk="${c}">${c}</button>`).join("")}</div>
+      ${s.msg ? `<p class="sp-status${s.busy ? " busy" : ""}">${s.busy ? '<span class="spin" aria-hidden="true"></span>' : ""}${esc(s.msg)}</p>` : ""}
+      ${s.results.length ? `
+        <div class="pl-head"><b>${esc(s.label)}</b><span>${picked} of ${s.results.length} ticked${picked > slots ? ` · only ${slots} fit` : ""}</span><button type="button" class="link small-link" id="plAll">${picked ? "Untick all" : "Tick all"}</button></div>
+        <ul class="pl-list">${s.results.map((r, i) => `
+          <li><label class="pl-row${r.on ? " on" : ""}"><input type="checkbox" data-pli="${i}" ${r.on ? "checked" : ""}><span class="pl-main"><b>${esc(r.name)}</b><small>${esc(r.sub)}</small></span></label></li>`).join("")}</ul>
+        <div class="actions"><button type="button" class="btn primary" id="plAdd" ${picked && picked <= slots ? "" : "disabled"}>Add ${picked || ""} card${picked === 1 ? "" : "s"}${ARROW}</button></div>` : ""}
+      <p class="fine">Places from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors. Cards start without photos; add your own.</p>
+    </div>`;
+}
+function openPlaces(target) {
+  // target: { slots(), add(names) -> Promise, mount(html), wire() }
+  PS = { q: PS?.q || "", results: [], msg: "", busy: false, label: "", target };
+  target.mount(placesHTML(target.slots())); wirePlaces();
+  const el = $("placesPanel"); el?.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+  $("plQ")?.focus({ preventScroll: true });
+}
+function closePlaces() { if (!PS) return; const t = PS.target; PS = null; t.mount(""); }
+function redrawPlaces() { if (!PS) return; const y = window.scrollY; PS.target.mount(placesHTML(PS.target.slots())); wirePlaces(); window.scrollTo(0, y); }
+function wirePlaces() {
+  if (!PS || !$("placesPanel")) return;
+  $("plClose").onclick = closePlaces;
+  $("plQ").oninput = e => { PS.q = e.target.value; };
+  $("plForm").onsubmit = e => { e.preventDefault(); runPlaces(); };
+  app.querySelectorAll("[data-plk]").forEach(b => b.onclick = () => {
+    const where = parsePlaceQuery(PS.q).where;
+    PS.q = `${b.dataset.plk.toLowerCase()} in ${where || ""}`.trim();
+    $("plQ").value = PS.q;
+    if (where) runPlaces(); else { $("plQ").focus(); const v = $("plQ"); v.setSelectionRange(v.value.length, v.value.length); }
+  });
+  app.querySelectorAll("[data-pli]").forEach(c => c.onchange = () => { PS.results[+c.dataset.pli].on = c.checked; redrawPlaces(); });
+  if ($("plAll")) $("plAll").onclick = () => { const any = PS.results.some(r => r.on); PS.results.forEach((r, i) => r.on = !any && i < PS.target.slots()); redrawPlaces(); };
+  if ($("plAdd")) $("plAdd").onclick = async () => {
+    const names = PS.results.filter(r => r.on).map(r => r.name.slice(0, 24));
+    $("plAdd").disabled = true; $("plAdd").firstChild.textContent = "Adding…";
+    const t = PS.target;
+    try { await t.add(names); PS = null; } catch (e) { toast(e.message || "Couldn't add those places"); redrawPlaces(); }
+  };
+}
+async function runPlaces() {
+  const q = (PS.q || "").trim(); if (!q) return toast("Type what and where, like pubs in Brixton");
+  PS.busy = true; PS.msg = "Searching the map…"; PS.results = []; redrawPlaces();
+  try {
+    const r = await searchPlaces(q);
+    if (!PS) return;
+    const slots = PS.target.slots();
+    PS.label = r.label;
+    PS.results = r.results.slice(0, 40).map((x, i) => ({ name: x.name, sub: placeSub(x, r.centre), on: i < Math.min(slots, 16) }));
+    PS.msg = PS.results.length ? "" : "Nothing found there. Try a nearby area, or a different kind of place.";
+  } catch (e) { if (PS) { PS.msg = e.message || "The map search didn't work. Try again."; } }
+  if (!PS) return;
+  PS.busy = false; redrawPlaces();
+}
+
+const MAP_PIN = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 18s-5.5-5.2-5.5-9.5a5.5 5.5 0 0 1 11 0C15.5 12.8 10 18 10 18z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="10" cy="8.5" r="2" stroke="currentColor" stroke-width="1.7"/></svg>';
+const groupPlacesTarget = () => ({ kind: "group",
+  slots: () => G ? MAX_CARDS - G.cards.length : 0,
+  mount: html => { const el = $("placesSlot"); if (el) el.innerHTML = html; },
+  add: async names => {
+    let n = 0;
+    try {
+      for (const nm of names) {
+        const { error } = await sb.rpc("add_draft_card", { p_draft: G.id, p_name: nm, p_image: null, p_is_me: false });
+        if (error) throw new Error(errMsg(error));
+        n++;
+      }
+    } finally {
+      PS = null;
+      if (n) { notifyGroup(G.id, "cards"); toast(`${n} card${n === 1 ? "" : "s"} added. Add photos with Edit on each card.`); }
+      if (G) { await loadDraft(); if (G) renderDraft(true); }
+    }
+  } });
+const editorPlacesTarget = () => ({ kind: "editor",
+  slots: () => E ? MAX_CARDS - E.cards.filter(c => c.name.trim() || c.image || c.vals.some(v => String(v).trim())).length : 0,
+  mount: html => { const el = $("placesSlot"); if (el) el.innerHTML = html; },
+  add: async names => {
+    E.cards = E.cards.filter(c => c.name.trim() || c.image || c.vals.some(v => String(v).trim()));
+    names.slice(0, MAX_CARDS - E.cards.length).forEach(nm => E.cards.push({ name: nm, vals: E.stats.map(() => ""), image: null }));
+    E.sel = Math.max(0, E.cards.length - names.length); saveDraft();
+    PS = null; rerender("#cardsPanel", `[data-cv="${E.sel}-0"]`);
+    toast(`${names.length} card${names.length === 1 ? "" : "s"} added. Now give them their stats.`);
+  } });
 
 /* ---------- Boot ---------- */
 async function boot() {
@@ -2324,8 +2718,9 @@ function renderEditor(restored) {
         <div class="panel" id="cardsPanel">
           <div class="panel-head"><h2>Cards <span class="count" id="cardCount">${E.cards.length}</span></h2><span class="needs" id="needs"></span></div>
           <p>${MIN_CARDS}–${MAX_CARDS} cards. Add a photo to make them yours.</p>
+          <div id="placesSlot">${PS && PS.target.kind === "editor" ? placesHTML(PS.target.slots()) : ""}</div>
           <div class="card-eds">${E.cards.map((c, i) => cardEditorHTML(c, i)).join("")}</div>
-          <button type="button" class="btn ghost small" id="addCard" ${E.cards.length >= MAX_CARDS ? "disabled" : ""}>${PLUS}Add card</button>
+          <div class="head-btns"><button type="button" class="btn ghost small" id="addCard" ${E.cards.length >= MAX_CARDS ? "disabled" : ""}>${PLUS}Add card</button><button type="button" class="btn ghost small" id="mapCards">${MAP_PIN}From the map</button></div>
         </div>
       </div>
 
@@ -2455,6 +2850,8 @@ function wireEditor() {
     }
   };
   $("saveDeck").onclick = saveDeck;
+  $("mapCards").onclick = () => openPlaces(editorPlacesTarget());
+  if (PS && PS.target.kind === "editor") wirePlaces();
   $("pvToggle").onclick = () => { const side = app.querySelector(".ed-side"), on = side.classList.toggle("show-pv"); $("pvToggle").setAttribute("aria-expanded", on); $("pvToggle").textContent = on ? "Hide" : "Preview"; };
 }
 
@@ -2526,7 +2923,7 @@ function leaveGame() {
   if (typeof E !== "undefined" && E) { clearTimeout(draftTimer); persistDraft(); E = null; }
   if (gameChan) { sb.removeChannel(gameChan); gameChan = null; }
   if (homeChan) { sb.removeChannel(homeChan); homeChan = null; }
-  clearInterval(tick); tick = 0; gameId = null; V = null; L = null; renderedKey = ""; queue = []; skipped = 0;
+  clearInterval(tick); tick = 0; gameId = null; V = null; L = null; PS = null; renderedKey = ""; queue = []; skipped = 0;
 }
 async function openGame(id) {
   leaveGame();
