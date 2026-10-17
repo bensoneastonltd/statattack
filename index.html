@@ -4,7 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StatAttack</title>
-<meta name="description" content="Pick a stat. Beat your mate. Take the card.">
+<meta name="description" content="Pick a stat. Beat your mate. Take the card. A stat battle card game for playing friends.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="theme-color" content="#f1f2f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c0e14" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StatAttack">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="StatAttack">
+<meta property="og:title" content="You've been challenged to StatAttack">
+<meta property="og:description" content="Pick a stat. Beat your mate. Take the card. Tap to join the game. Free, no download.">
+<meta property="og:url" content="https://bensoneastonltd.github.io/statattack/">
+<meta property="og:image" content="https://bensoneastonltd.github.io/statattack/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="StatAttack: Pick a stat. Beat your mate. Take the card.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;600&family=Unbounded:wght@500;700&display=swap">
@@ -531,6 +550,29 @@ button.row:not(:disabled):active { transform: scale(.985); }
   .se .toggle { grid-column: 1 / 3; }
   .se .icon-btn { grid-row: 1; grid-column: 3; }
 }
+/* Install card, account and alerts */
+.install { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 14px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); animation: pillIn .4s var(--ease) both; }
+.install-icon img { width: 48px; height: 48px; border-radius: 12px; display: block; }
+.install-text { display: grid; gap: 2px; min-width: 0; font-size: 13.5px; color: var(--muted); }
+.install-text b { color: var(--ink); font-size: 14.5px; font-weight: 600; }
+.install-text span b { font-size: inherit; }
+.ios-share { width: 15px; height: 15px; vertical-align: -2px; color: var(--accent); }
+.install-actions { display: flex; align-items: center; gap: 10px; }
+@media (max-width: 520px) { .install { grid-template-columns: auto minmax(0, 1fr); } .install-actions { grid-column: 1 / -1; justify-content: flex-end; } }
+.auth-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.gbtn svg { width: 18px; height: 18px; flex: none; }
+.email-flow { display: grid; gap: 8px; }
+.email-flow > div { display: grid; gap: 8px; }
+.link.inline { padding: 0; font-size: inherit; color: var(--accent); text-decoration: underline; display: inline; }
+.setting-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); }
+.setting-row:empty { display: none; }
+.setting-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.setting-icon svg { width: 18px; height: 18px; }
+.setting-text { display: grid; gap: 2px; min-width: 0; font-size: 13px; color: var(--muted); }
+.setting-text b { color: var(--ink); font-size: 14px; font-weight: 600; }
+.invite .setting-row { text-align: left; width: min(440px, 100%); }
+@media (max-width: 520px) { .setting-row { grid-template-columns: auto minmax(0, 1fr); } .setting-row .btn { grid-column: 1 / -1; justify-self: start; } }
+#signOut.sure { font-weight: 700; }
 .loading { display: grid; place-items: center; min-height: 50vh; color: var(--muted); gap: 12px; }
 
 </style>
@@ -808,10 +850,229 @@ function artFor(d, c) {
   return "";
 }
 
+
+/* ---------- App install, turn alerts and accounts ---------- */
+const APP_URL = location.origin + location.pathname.replace(/index\.html$/, "");
+const VAPID_PUBLIC = "BPsY8VcZ_BA8Ebjg9F24oCff07-Pdn-JHVcz2KEJ8_MI1NaZwgwevr0xHjVqtwt8lQURIAhg47jC6ZtQbodXFII";
+const GOOGLE_G = '<svg viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>';
+const SHARE_IOS = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="ios-share"><path d="M10 2.5v10M6.5 6 10 2.5 13.5 6M6 9H4.5v8.5h11V9H14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const BELL = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8.5a5 5 0 0 1 10 0c0 4 1.5 5.5 1.5 5.5h-13S5 12.5 5 8.5zM8.2 16.5a2 2 0 0 0 3.6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isStandalone = () => (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+let installPrompt = null, isGuest = true, myEmail = "", authNotice = "", emailMode = "link", emailAddr = "";
+
+// Service worker: offline play + turn alerts
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data && e.data.type === "open") { const id = new URL(e.data.url).searchParams.get("game"); if (id && sb && !offline) openGame(id); }
+  });
+}
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; refreshInstallSlot(); });
+window.addEventListener("appinstalled", () => { installPrompt = null; refreshInstallSlot(); toast("StatAttack installed"); });
+
+/* Install card on the home screen */
+function installDismissed() { const t = Number(store.get("sa-install-hide") || 0); return t && Date.now() - t < 14 * 864e5; }
+function installHTML() {
+  if (isStandalone() || installDismissed()) return "";
+  if (installPrompt) return `
+    <div class="install" id="install">
+      <span class="install-icon" aria-hidden="true"><img src="icons/icon-192.png" alt=""></span>
+      <div class="install-text"><b>Install StatAttack</b><span>Full screen, on your home screen, with turn alerts.</span></div>
+      <div class="install-actions"><button type="button" class="btn primary small" id="installGo">Install</button><button type="button" class="link" id="installHide">Not now</button></div>
+    </div>`;
+  if (isIOS) return `
+    <div class="install" id="install">
+      <span class="install-icon" aria-hidden="true"><img src="icons/icon-192.png" alt=""></span>
+      <div class="install-text"><b>Add StatAttack to your Home Screen</b><span>Tap ${SHARE_IOS} <b>Share</b>, then <b>Add to Home Screen</b>. It keeps your decks safe and lets us tell you when it's your turn.</span></div>
+      <div class="install-actions"><button type="button" class="link" id="installHide">Got it</button></div>
+    </div>`;
+  return "";
+}
+function wireInstall() {
+  const go = $("installGo");
+  if (go) go.onclick = async () => { const p = installPrompt; if (!p) return; installPrompt = null; p.prompt(); try { await p.userChoice; } catch (e) {} refreshInstallSlot(); };
+  const hide = $("installHide");
+  if (hide) hide.onclick = () => { store.set("sa-install-hide", String(Date.now())); refreshInstallSlot(); };
+}
+function refreshInstallSlot() {
+  const slot = $("installSlot"); if (!slot) return;
+  slot.innerHTML = installHTML(); wireInstall();
+}
+
+/* Turn alerts */
+const b64ToBytes = s => { const p = "=".repeat((4 - s.length % 4) % 4), raw = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(raw, c => c.charCodeAt(0)); };
+async function alertsState() {
+  if (isIOS && !isStandalone()) return "needs-install";
+  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return "unsupported";
+  if (Notification.permission === "denied") return "denied";
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = reg && await reg.pushManager.getSubscription();
+    return sub && Notification.permission === "granted" ? "on" : "off";
+  } catch (e) { return "off"; }
+}
+async function enableAlerts() {
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") { toast("Alerts weren't allowed. You can change this in your browser settings."); return false; }
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(VAPID_PUBLIC) });
+    const j = sub.toJSON();
+    const { error } = await sb.rpc("save_push_subscription", { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+    if (error) { toast(errMsg(error)); return false; }
+    toast("Turn alerts are on");
+    return true;
+  } catch (e) { toast("Alerts couldn't be turned on on this device."); return false; }
+}
+async function disableAlerts() {
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = reg && await reg.pushManager.getSubscription();
+    if (sub) { await sb.rpc("disable_push_subscription", { p_endpoint: sub.endpoint }); await sub.unsubscribe(); }
+    toast("Turn alerts are off");
+  } catch (e) {}
+}
+async function renderAlertsRow() {
+  const row = $("alertsRow"); if (!row) return;
+  const st = await alertsState();
+  const text = {
+    on: "On. We'll tell you when it's your turn, when a friend joins and when a game ends.",
+    off: "Get told when it's your turn, when a friend joins and when a game ends.",
+    "needs-install": "On iPhone, add StatAttack to your Home Screen first (Share, then Add to Home Screen), then open it from there and turn alerts on.",
+    denied: "Alerts are blocked for this site. Allow notifications for StatAttack in your settings, then come back.",
+    unsupported: "This browser can't show alerts. Try Chrome, Edge, Firefox, or StatAttack on your iPhone Home Screen."
+  }[st];
+  row.innerHTML = `<span class="setting-icon">${BELL}</span><div class="setting-text"><b>Turn alerts</b><span>${text}</span></div>
+    ${st === "on" ? `<button type="button" class="btn ghost small" id="alertsOff">Turn off</button>` : st === "off" ? `<button type="button" class="btn primary small" id="alertsOn">Turn on</button>` : ""}`;
+  if ($("alertsOn")) $("alertsOn").onclick = async () => { $("alertsOn").disabled = true; await enableAlerts(); renderAlertsRow(); };
+  if ($("alertsOff")) $("alertsOff").onclick = async () => { await disableAlerts(); renderAlertsRow(); };
+}
+function notifyOpponent(id) {
+  if (!sb || offline || !id) return;
+  try { sb.functions.invoke("notify", { body: { game_id: id } }).catch(() => {}); } catch (e) {}
+}
+
+/* Accounts: guests can save their account with Google or an emailed code, or sign in to an existing one */
+function accountHTML() {
+  if (!isGuest) return `
+    <div class="panel" id="acct">
+      <div class="panel-head"><h2>Your account</h2><span class="badge won">Saved</span></div>
+      <p>Signed in as <b>${esc(myEmail || "your Google account")}</b>. Your name, decks and games follow you to any device.</p>
+      <div class="setting-row" id="alertsRow"></div>
+      <div class="row-form"><button type="button" class="link danger" id="signOut">Sign out</button></div>
+    </div>`;
+  return `
+    <div class="panel" id="acct">
+      <div class="panel-head"><h2>Save your account</h2><span class="badge">Guest</span></div>
+      <p>You're playing as a guest, so your decks and games live only on this device. Save your account to keep them safe and play anywhere.</p>
+      ${authNotice ? `<div class="notebar" id="authNotice">${authNotice}</div>` : ""}
+      <div class="auth-btns" id="authBtns">
+        <button type="button" class="btn ghost small gbtn" id="googleBtn">${GOOGLE_G}Continue with Google</button>
+        <button type="button" class="btn ghost small" id="emailBtn">Use email</button>
+      </div>
+      <form class="email-flow" id="emailFlow" hidden novalidate>
+        <div id="emailStep">
+          <label class="section-title" for="emailIn">Email</label>
+          <div class="row-form"><div class="field"><input id="emailIn" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"></div><button type="submit" class="btn primary small" id="sendCode">Send code</button></div>
+        </div>
+        <div id="codeStep" hidden>
+          <label class="section-title" for="codeIn" id="codeLbl">Enter the 6-digit code we emailed you</label>
+          <div class="row-form"><div class="field"><input id="codeIn" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div><button type="submit" class="btn primary small" id="verifyCode">Verify</button></div>
+          <button type="button" class="link small-link" id="changeEmail">Use a different email</button>
+        </div>
+      </form>
+      <p class="fine">Already have an account? <button type="button" class="link small-link inline" id="haveAccount">Sign in to it</button>. We only use your email to sign you in.</p>
+      <div class="setting-row" id="alertsRow"></div>
+    </div>`;
+}
+function wireAccount() {
+  renderAlertsRow();
+  const out = $("signOut");
+  if (out) out.onclick = async () => {
+    if (!out.classList.contains("sure")) { out.classList.add("sure"); out.textContent = "Tap again to sign out"; setTimeout(() => { if (out.isConnected) { out.classList.remove("sure"); out.textContent = "Sign out"; } }, 3000); return; }
+    await sb.auth.signOut(); location.replace(APP_URL);
+  };
+  if (!$("googleBtn")) return;
+  $("googleBtn").onclick = () => googleSignIn(false);
+  $("emailBtn").onclick = () => openEmail("link");
+  $("haveAccount").onclick = () => {
+    authNotice = `Signing in switches this device to that account. Games you played here as a guest stay with the guest account.
+      <span class="auth-btns"><button type="button" class="btn ghost small gbtn" id="googleSignIn">${GOOGLE_G}Google</button><button type="button" class="btn ghost small" id="emailSignIn">Email code</button></span>`;
+    rerenderAccount();
+    $("googleSignIn").onclick = () => googleSignIn(true);
+    $("emailSignIn").onclick = () => openEmail("signin");
+  };
+  if ($("switchGoogle")) $("switchGoogle").onclick = () => googleSignIn(true);
+  $("emailFlow").onsubmit = e => { e.preventDefault(); if (!$("codeStep").hidden) verifyCode(); else sendCode(); };
+  $("changeEmail").onclick = () => { $("codeStep").hidden = true; $("emailStep").hidden = false; $("emailIn").focus(); };
+}
+function rerenderAccount() { const a = $("acct"); if (!a) return; a.outerHTML = accountHTML(); wireAccount(); }
+function openEmail(mode) {
+  emailMode = mode;
+  $("emailFlow").hidden = false; $("emailStep").hidden = false; $("codeStep").hidden = true;
+  $("emailIn").focus();
+}
+async function googleSignIn(switching) {
+  const opts = { provider: "google", options: { redirectTo: APP_URL } };
+  const { error } = switching || !isGuest ? await sb.auth.signInWithOAuth(opts) : await sb.auth.linkIdentity(opts);
+  if (error) toast(/manual linking|not enabled|provider/i.test(error.message) ? "Google sign-in isn't switched on yet. Use email for now." : errMsg(error));
+}
+async function sendCode() {
+  const email = $("emailIn").value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast("Enter a valid email address"); $("emailIn").focus(); return; }
+  const btn = $("sendCode"); btn.disabled = true; btn.textContent = "Sending…";
+  emailAddr = email;
+  let error = null;
+  if (emailMode === "link" && isGuest) {
+    ({ error } = await sb.auth.updateUser({ email }, { emailRedirectTo: APP_URL }));
+    if (error && /already|registered|exists|in use/i.test(error.message)) {
+      emailMode = "signin";
+      authNotice = "That email already has a StatAttack account. Enter the code to switch this device to it. Games you played here as a guest stay with the guest account.";
+      error = null;
+    }
+  }
+  if (emailMode === "signin") ({ error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: APP_URL } }));
+  btn.disabled = false; btn.textContent = "Send code";
+  if (error) { toast(/rate|seconds|too many/i.test(error.message) ? "Too many codes sent. Wait a minute and try again." : /signups not allowed|not found|no user/i.test(error.message) ? "There's no StatAttack account with that email." : errMsg(error)); return; }
+  if (authNotice && $("authNotice")) $("authNotice").innerHTML = authNotice;
+  else if (authNotice) $("authBtns").insertAdjacentHTML("beforebegin", `<div class="notebar" id="authNotice">${authNotice}</div>`);
+  $("emailStep").hidden = true; $("codeStep").hidden = false;
+  $("codeLbl").textContent = `Enter the 6-digit code we emailed to ${email}`;
+  $("codeIn").value = ""; $("codeIn").focus();
+}
+async function verifyCode() {
+  const token = $("codeIn").value.replace(/\D/g, "");
+  if (token.length < 6) { toast("Enter all 6 digits"); return; }
+  const btn = $("verifyCode"); btn.disabled = true; btn.textContent = "Checking…";
+  const { data, error } = await sb.auth.verifyOtp({ email: emailAddr, token, type: emailMode === "link" ? "email_change" : "email" });
+  btn.disabled = false; btn.textContent = "Verify";
+  if (error) { toast(/expired|invalid/i.test(error.message) ? "That code is wrong or has expired. Check the email or send a new one." : errMsg(error)); return; }
+  if (emailMode === "signin" || (data && data.user && data.user.id !== me)) { location.replace(APP_URL); return; }
+  toast("Account saved");
+  isGuest = false; myEmail = emailAddr; authNotice = "";
+  home();
+}
+function readAuthReturn() {
+  // Errors from a Google round trip come back in the address bar
+  const params = new URLSearchParams(location.search + "&" + location.hash.replace(/^#/, ""));
+  const code = params.get("error_code"), desc = params.get("error_description");
+  if (!code && !desc) return;
+  if (code === "identity_already_exists" || /already linked|already exists/i.test(desc || "")) {
+    authNotice = `That Google account already has a StatAttack account. <button type="button" class="link inline" id="switchGoogle">Sign in to it instead</button>. Games you played here as a guest stay with the guest account.`;
+  } else authNotice = esc(desc || "Sign-in didn't finish. Try again.");
+  history.replaceState(null, "", location.pathname);
+}
+
 /* ---------- Boot ---------- */
 async function boot() {
   app.innerHTML = `<div class="loading view"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><span>Connecting…</span></div>`;
   if (!window.supabase) return goOffline("The online service didn't load. Check your connection and refresh to play friends.");
+  readAuthReturn();
+  const openId = new URLSearchParams(location.search).get("game");
+  if (openId) history.replaceState(null, "", location.pathname + location.hash);
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   let session = null;
   try { ({ data: { session } } = await sb.auth.getSession()); } catch (e) {}
@@ -823,9 +1084,21 @@ async function boot() {
     session = data.session;
   }
   me = session.user.id;
+  isGuest = !!session.user.is_anonymous;
+  myEmail = session.user.email || (session.user.user_metadata && session.user.user_metadata.email) || "";
+  sb.auth.onAuthStateChange((event, s) => {
+    // a different account (signed in elsewhere in this browser, or switched) reloads the app as that player
+    if (s && s.user && s.user.id !== me) { location.replace(APP_URL); return; }
+    if (s && s.user && event === "USER_UPDATED") {
+      const wasGuest = isGuest; isGuest = !!s.user.is_anonymous; myEmail = s.user.email || myEmail;
+      if (wasGuest !== isGuest && $("acct")) rerenderAccount();
+    }
+  });
   try { await loadDecks(); } catch (e) { return goOffline(esc(errMsg(e))); }
   const { data: p } = await sb.from("profiles").select("display_name").eq("id", me).maybeSingle();
   myName = p?.display_name || ""; if (myName) names[me] = myName;
+  if (!myName && !isGuest && session.user.user_metadata && session.user.user_metadata.full_name) await saveName(String(session.user.user_metadata.full_name).split(" ")[0]);
+  if (openId && /^[0-9a-f-]{36}$/i.test(openId)) return openGame(openId);
   const code = (location.hash || "").slice(1).toUpperCase();
   if (/^[A-Z0-9]{6}$/.test(code)) {
     history.replaceState(null, "", location.pathname + location.search);
@@ -848,10 +1121,12 @@ async function home(pendingCode) {
     app.innerHTML = `
     <section class="home view">
       <div class="greeting"><h1>Pick a stat. Beat your mate. <span>Take the card.</span></h1></div>
+      <div id="installSlot">${installHTML()}</div>
       <div class="panel setup-error"><h2>Playing friends is unavailable</h2><p>${offlineReason}</p><p>You can still play the computer below.</p></div>
       ${practicePanel()}
     </section>`;
     wirePractice();
+    wireInstall();
     return;
   }
   const deckTiles = playableDecks().map(d => `
@@ -863,6 +1138,7 @@ async function home(pendingCode) {
   app.innerHTML = `
   <section class="home view">
     <div class="greeting"><h1>${myName ? `Hi ${esc(myName)}. <span>Who are you taking on?</span>` : `Pick a stat. Beat your mate. <span>Take the card.</span>`}</h1></div>
+    <div id="installSlot">${installHTML()}</div>
     ${pendingCode ? `<div class="panel"><h2>You've been invited</h2><p>Add your name so your friend knows who they're playing, then join game <b>${esc(pendingCode)}</b>.</p></div>` : ""}
     <div class="panel">
       <label class="section-title" for="name">Your name</label>
@@ -879,6 +1155,7 @@ async function home(pendingCode) {
       <p class="note">You'll get a code and a link to send your friend. 24h is for playing a turn whenever you get a minute.</p>
     </div>
     ${myDecksPanel()}
+    ${accountHTML()}
     ${practicePanel()}
     <div class="panel">
       <h2>Join a game</h2>
@@ -894,6 +1171,8 @@ async function home(pendingCode) {
   };
   wirePractice();
   wireMyDecks();
+  wireInstall();
+  if ($("acct")) wireAccount();
   if (pendingCode) { $("joinPending").onclick = async () => { if (await needName()) joinGame(pendingCode); }; return; }
   $("saveName").onclick = async () => { if (await needName()) toast("Name saved"); };
   app.querySelectorAll("[data-deck]").forEach(b => b.onclick = async () => {
@@ -946,6 +1225,7 @@ async function renderGameList() {
 async function joinGame(code) {
   const { data, error } = await sb.rpc("join_game", { p_code: code });
   if (error) { toast(errMsg(error)); return home(); }
+  notifyOpponent(data.game.id);
   openGame(data.game.id);
 }
 
@@ -1364,6 +1644,7 @@ async function forfeit() {
   const opp = names[oppId()] || "Your friend";
   confirmBar(`Forfeit this game? ${esc(opp)} gets the win.`, "Forfeit", async () => {
     const { error } = await sb.rpc("forfeit_game", { p_game: gameId });
+    if (!error) notifyOpponent(gameId);
     if (error) return toast(errMsg(error));
     queue = []; renderedKey = ""; refresh();
   }, "Keep playing");
@@ -1424,6 +1705,7 @@ async function play(i) {
   $("sYou").querySelector(".stats")?.classList.remove("prompt");
   setStatus("wait", `You played <b>${esc(DECKS[V.game.deck_key].stats[i].label)}</b>`);
   const { error } = await sb.rpc("play_stat", { p_game: gameId, p_stat: i });
+  if (!error) notifyOpponent(gameId);
   busy = false;
   if (error) { toast(errMsg(error)); renderedKey = ""; return refresh(); }
   refresh();
@@ -1481,6 +1763,10 @@ async function renderReveal(r) {
   };
 }
 
+function inviteText(g) {
+  const who = myName || "Your mate", d = DECKS[g.deck_key];
+  return `${who} has challenged you to StatAttack${d ? ` (${d.name})` : ""}. Pick a stat, beat your mate, take the card. Join with code ${g.code}:`;
+}
 function renderInvite(g) {
   const link = location.origin + location.pathname + "#" + g.code;
   app.innerHTML = `
@@ -1491,8 +1777,9 @@ function renderInvite(g) {
       <div class="code" aria-label="Game code">${esc(g.code)}</div>
       <p>Send them the link, or they can type the code on the StatAttack home screen.</p>
       <span class="link" id="inviteLink">${esc(link)}</span>
-      <div class="actions"><button type="button" class="btn primary" id="share">${navigator.share ? "Share invite" : "Copy invite link"}${ARROW}</button></div>
+      <div class="actions"><button type="button" class="btn primary" id="share">${navigator.share ? "Share invite" : "Copy invite link"}${ARROW}</button><a class="btn ghost" id="waShare" href="https://wa.me/?text=${encodeURIComponent(inviteText(g) + " " + link)}" target="_blank" rel="noopener">WhatsApp</a></div>
       <span class="waiting-dots">Waiting for them to join<span class="dots"><i></i><i></i><i></i></span></span>
+      <div class="setting-row" id="inviteAlerts" hidden></div>
       ${g.p1 === me ? `<button type="button" class="link danger" id="cancelGame">Cancel this game</button>` : ""}
     </div>
   </section>`;
@@ -1503,11 +1790,17 @@ function renderInvite(g) {
     toast("Game cancelled"); home();
   }, "Keep it");
   $("share").onclick = async () => {
-    const text = `Fancy a game of StatAttack? Join with code ${g.code}`;
+    const text = inviteText(g);
     if (navigator.share) { try { await navigator.share({ title: "StatAttack", text, url: link }); } catch (e) {} return; }
     try { await navigator.clipboard.writeText(link); toast("Link copied"); }
     catch (e) { const r = document.createRange(); r.selectNodeContents($("inviteLink")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Press copy to copy the link"); }
   };
+  alertsState().then(st => {
+    const box = $("inviteAlerts"); if (!box || st !== "off") return;
+    box.hidden = false;
+    box.innerHTML = `<span class="setting-icon">${BELL}</span><div class="setting-text"><b>Get an alert when they join</b><span>And whenever it's your turn.</span></div><button type="button" class="btn primary small" id="inviteAlertsOn">Turn on</button>`;
+    $("inviteAlertsOn").onclick = async () => { if (await enableAlerts()) box.hidden = true; };
+  });
 }
 
 function renderOver() {
@@ -1529,6 +1822,7 @@ function renderOver() {
   if ($("rematch")) $("rematch").onclick = async () => {
     const { data, error } = await sb.rpc("rematch", { p_game: g.id });
     if (error) return toast(errMsg(error));
+    notifyOpponent(data.game.id);
     openGame(data.game.id);
   };
 }
@@ -1551,7 +1845,8 @@ function clock() {
   const pill = $("pill"); if (pill && g.turn === me) { pill.classList.toggle("hurry", urgent); pill.classList.toggle("turn", !urgent); }
   if (left < -400 && claimedFor !== g.turn_deadline) {
     claimedFor = g.turn_deadline;
-    sb.rpc("claim_timeout", { p_game: gameId }).then(() => refresh());
+    const gid = gameId;
+    sb.rpc("claim_timeout", { p_game: gid }).then(() => { notifyOpponent(gid); refresh(); });
   }
 }
 // An invite link opened in a tab that already has StatAttack open only changes the #code
